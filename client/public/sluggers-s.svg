@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Navy background -->
+  <rect width="100" height="100" rx="12" fill="#08122a"/>
+  <!-- Gold outer accent line -->
+  <rect x="3" y="3" width="94" height="94" rx="10" fill="none" stroke="#c9a535" stroke-width="2"/>
+  <!-- Inner white border -->
+  <rect x="7" y="7" width="86" height="86" rx="7" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <!-- The S glyph - bold varsity italic -->
+  <text
+    x="51" y="77"
+    font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif"
+    font-size="76"
+    font-weight="900"
+    font-style="italic"
+    text-anchor="middle"
+    fill="white"
+    letter-spacing="-2"
+  >S</text>
+</svg>

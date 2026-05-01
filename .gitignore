@@ -1,0 +1,6 @@
+node_modules/
+.env
+client/dist/
+server/baseball.db
+server/baseball.db-journal
+server/uploads/

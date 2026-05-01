@@ -1,0 +1,171 @@
+import React, { useEffect, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getGames, getTeams, createGame } from '../api/client.js';
+import SortableTable from '../components/SortableTable.jsx';
+import GameForm from '../components/GameForm.jsx';
+
+function formatDate(d) {
+  if (!d) return '—';
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function getResult(game) {
+  if (game.team_score === null || game.opponent_score === null) return '—';
+  if (game.team_score > game.opponent_score) return 'W';
+  if (game.team_score < game.opponent_score) return 'L';
+  return 'T';
+}
+
+export default function GameLog() {
+  const navigate = useNavigate();
+  const [games, setGames] = useState([]);
+  const [teams, setTeams] = useState([]);
+  const [teamFilter, setTeamFilter] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+
+  const load = (tid) => {
+    setLoading(true);
+    Promise.all([
+      getGames(tid || undefined),
+      getTeams()
+    ]).then(([g, t]) => {
+      setGames(g);
+      setTeams(t);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  };
+
+  useEffect(() => { load(teamFilter); }, [teamFilter]);
+
+  const handleCreate = async (data) => {
+    await createGame(data);
+    load(teamFilter);
+    setShowModal(false);
+  };
+
+  const columns = useMemo(() => [
+    {
+      header: 'Date', accessorKey: 'game_date',
+      cell: i => <span className="text-muted text-sm">{formatDate(i.getValue())}</span>
+    },
+    {
+      header: 'Team', accessorKey: 'team_name',
+      cell: i => {
+        const game = i.row.original;
+        return (
+          <span className="font-medium" style={{ color: game.team_color || '#e63946' }}>
+            {i.getValue()}
+          </span>
+        );
+      }
+    },
+    {
+      header: 'Opponent', accessorKey: 'opponent',
+      cell: i => <span className="font-medium text-white">{i.getValue()}</span>
+    },
+    {
+      header: 'Location', accessorKey: 'location',
+      cell: i => <span className="text-muted text-sm">{i.getValue() || '—'}</span>
+    },
+    {
+      header: 'H/A', accessorKey: 'home_away',
+      cell: i => <span className="capitalize text-muted text-xs">{i.getValue()}</span>
+    },
+    {
+      header: 'Score',
+      id: 'score',
+      accessorFn: r => r.team_score !== null ? r.team_score : -999,
+      cell: i => {
+        const g = i.row.original;
+        if (g.team_score === null) return <span className="text-muted">—</span>;
+        return <span className="font-mono font-bold text-white">{g.team_score} – {g.opponent_score}</span>;
+      }
+    },
+    {
+      header: 'Result',
+      id: 'result',
+      accessorFn: r => getResult(r),
+      cell: i => {
+        const r = i.getValue();
+        return (
+          <span className={`font-bold text-sm ${r === 'W' ? 'text-emerald-400' : r === 'L' ? 'text-red-400' : r === 'T' ? 'text-yellow-400' : 'text-muted'}`}>
+            {r}
+          </span>
+        );
+      }
+    }
+  ], []);
+
+  // Summary stats
+  const wins = games.filter(g => getResult(g) === 'W').length;
+  const losses = games.filter(g => getResult(g) === 'L').length;
+  const ties = games.filter(g => getResult(g) === 'T').length;
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-black text-white">Game Log</h1>
+          <p className="text-muted text-sm mt-1">
+            {games.length} game{games.length !== 1 ? 's' : ''}
+            {wins > 0 || losses > 0 ? ` · ` : ''}
+            {(wins > 0 || losses > 0) && (
+              <>
+                <span className="text-emerald-400">{wins}W</span>
+                {' – '}
+                <span className="text-red-400">{losses}L</span>
+                {ties > 0 && <span className="text-yellow-400"> – {ties}T</span>}
+              </>
+            )}
+          </p>
+        </div>
+        <button className="btn-primary" onClick={() => setShowModal(true)}>+ Add Game</button>
+      </div>
+
+      {/* Filter */}
+      <div className="mb-5 flex gap-3 flex-wrap">
+        <select
+          value={teamFilter}
+          onChange={e => setTeamFilter(e.target.value)}
+          className="select-field w-auto min-w-[180px]"
+        >
+          <option value="">All Teams</option>
+          {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+        </select>
+        {teamFilter && (
+          <button className="btn-secondary text-sm px-3" onClick={() => setTeamFilter('')}>
+            Clear Filter ✕
+          </button>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center h-48">
+          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : (
+        <SortableTable
+          columns={columns}
+          data={games}
+          onRowClick={(game) => navigate(`/games/${game.id}`)}
+          defaultSortField="game_date"
+          defaultSortDesc={true}
+          emptyMessage="No games logged yet. Add your first game!"
+        />
+      )}
+
+      {showModal && (
+        <div className="modal-backdrop" onClick={() => setShowModal(false)}>
+          <div className="card w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
+            <h2 className="text-xl font-bold mb-5">Add Game</h2>
+            <GameForm
+              onSubmit={handleCreate}
+              onCancel={() => setShowModal(false)}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

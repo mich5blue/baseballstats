@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: #060c1e;
+    color: white;
+    font-family: 'Inter', system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #060c1e;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1a3260;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #c9a535;
+  }
+}
+
+@layer components {
+  .stat-value {
+    @apply font-mono font-bold text-white;
+  }
+
+  .btn-primary {
+    @apply bg-accent hover:bg-[#b8911e] text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-surface2 hover:bg-surface text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 border border-border active:scale-95;
+  }
+
+  .btn-danger {
+    @apply bg-red-900 hover:bg-red-800 text-red-200 font-medium px-3 py-1.5 rounded transition-all duration-200 text-sm;
+  }
+
+  .card {
+    @apply bg-card border border-border rounded-xl;
+  }
+
+  .input-field {
+    @apply bg-surface border border-border text-white rounded-lg px-3 py-2 w-full focus:outline-none focus:border-accent transition-colors placeholder-muted;
+  }
+
+  .select-field {
+    @apply bg-surface border border-border text-white rounded-lg px-3 py-2 w-full focus:outline-none focus:border-accent transition-colors;
+  }
+
+  .table-header {
+    @apply bg-surface text-muted text-xs uppercase tracking-wider px-4 py-3 text-left;
+  }
+
+  .table-cell {
+    @apply px-4 py-3 text-sm border-b border-border;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .tab-active {
+    @apply border-b-2 border-accent text-white font-semibold;
+  }
+
+  .tab-inactive {
+    @apply border-b-2 border-transparent text-muted hover:text-white transition-colors;
+  }
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Animated stat numbers */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stat-animate {
+  animation: countUp 0.4s ease-out;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #c9a535, #e8d080);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Table row hover */
+.table-row-hover:hover {
+  background-color: rgba(201, 165, 53, 0.08);
+  cursor: pointer;
+}
