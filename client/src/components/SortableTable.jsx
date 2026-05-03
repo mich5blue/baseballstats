@@ -13,7 +13,8 @@ export default function SortableTable({
   emptyMessage = 'No data available',
   className = '',
   defaultSortField,
-  defaultSortDesc = false
+  defaultSortDesc = false,
+  footerRow = null,
 }) {
   const [sorting, setSorting] = React.useState(
     defaultSortField ? [{ id: defaultSortField, desc: defaultSortDesc }] : []
@@ -76,6 +77,7 @@ export default function SortableTable({
               </tr>
             ))
           )}
+          {footerRow}
         </tbody>
       </table>
     </div>

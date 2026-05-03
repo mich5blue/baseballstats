@@ -22,7 +22,8 @@ export default function App() {
             <Route path="/games" element={<GameLog />} />
             <Route path="/games/:id" element={<GameDetail />} />
             <Route path="/stats" element={<TeamStats />} />
-            <Route path="/import" element={<Import />} />
+            <Route path="/admin" element={<Import />} />
+            <Route path="/import" element={<Navigate to="/admin" replace />} />
             {/* Legacy redirects */}
             <Route path="/players" element={<Navigate to="/roster" replace />} />
             <Route path="/teams" element={<Navigate to="/" replace />} />

@@ -46,7 +46,6 @@ export default function Navbar() {
     { to: '/roster', label: 'Roster' },
     { to: '/games', label: 'Games' },
     { to: '/stats', label: 'Stats' },
-    { to: '/import', label: 'Import' },
   ];
 
   return (
