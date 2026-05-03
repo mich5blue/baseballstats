@@ -4,11 +4,11 @@
   functions = "netlify/functions"
 
 [functions]
-  node_bundler = "esbuild"
+  node_bundler = "nft"
 
 [[redirects]]
   from   = "/api/*"
-  to     = "/.netlify/functions/api/:splat"
+  to     = "/.netlify/functions/api"
   status = 200
 
 [[redirects]]
