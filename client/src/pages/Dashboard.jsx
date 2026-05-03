@@ -161,7 +161,6 @@ export default function Dashboard() {
                 <h2 className="text-3xl font-black text-white">{featured.player.name}</h2>
                 {featured.player.nickname && <p className="text-muted">"{featured.player.nickname}"</p>}
                 <div className="flex items-center gap-3 mt-1 text-sm text-muted flex-wrap">
-                  {featured.player.position && <span className="badge bg-accent/20 text-accent">{featured.player.position}</span>}
                   <span>Bats {featured.player.bats} · Throws {featured.player.throws}</span>
                 </div>
               </div>

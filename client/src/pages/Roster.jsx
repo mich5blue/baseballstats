@@ -185,12 +185,6 @@ export default function Roster() {
                     </div>
                     {player.nickname && <p className="text-muted text-xs truncate">"{player.nickname}"</p>}
                     <div className="flex items-center gap-2 mt-1">
-                      {player.position && (
-                        <span className="text-xs font-bold px-1.5 py-0.5 rounded"
-                          style={{ backgroundColor: pColor + '25', color: pColor }}>
-                          {player.position}
-                        </span>
-                      )}
                       <span className="text-muted text-xs">
                         B:{player.bats} T:{player.throws}
                       </span>

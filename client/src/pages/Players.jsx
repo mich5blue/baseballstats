@@ -194,9 +194,6 @@ export default function Players() {
               </div>
 
               <div className="flex items-center gap-2 mb-3">
-                {player.position && (
-                  <span className="badge bg-accent/20 text-accent">{player.position}</span>
-                )}
                 <span className="text-muted text-xs">B:{player.bats} T:{player.throws}</span>
               </div>
 

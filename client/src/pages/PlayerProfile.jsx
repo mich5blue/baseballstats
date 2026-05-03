@@ -290,11 +290,6 @@ export default function PlayerProfile() {
                 </div>
                 {player.nickname && <p className="text-muted text-lg">"{player.nickname}"</p>}
                 <div className="flex items-center gap-3 mt-1.5 flex-wrap text-sm">
-                  {player.position && (
-                    <span className="badge font-bold" style={{ backgroundColor: pColor + '25', color: pColor }}>
-                      {player.position}
-                    </span>
-                  )}
                   {/* Bats — click cycles L → R → S → L */}
                   <span className="text-muted flex items-center gap-1">
                     Bats:&nbsp;
