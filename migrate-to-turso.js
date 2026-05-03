@@ -15,7 +15,19 @@
  */
 
 const path = require('path');
-const { createClient } = require('@libsql/client');
+
+// Find @libsql/client wherever it's installed
+let createClient;
+try {
+  createClient = require('@libsql/client').createClient;
+} catch (_) {
+  try {
+    createClient = require(path.join(__dirname, 'server', 'node_modules', '@libsql', 'client')).createClient;
+  } catch (e) {
+    console.error('Cannot find @libsql/client. Run: cd server && npm install');
+    process.exit(1);
+  }
+}
 
 // Load .env if present (Node ≥ 20 built-in flag isn't available when running
 // directly, so we do a quick manual parse instead of requiring dotenv)
