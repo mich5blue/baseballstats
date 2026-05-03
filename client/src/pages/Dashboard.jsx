@@ -37,7 +37,7 @@ function TeamTotalTile({ label, value, sub, color = 'text-white' }) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { teamId } = useTeam();
+  const { teamId, team } = useTeam();
   const tp = useTeamPath();
 
   const { data: featured = null } = useQuery({ queryKey: ['featured'], queryFn: () => getFeaturedStats().catch(() => null) });
@@ -109,18 +109,16 @@ export default function Dashboard() {
       {/* ── Team Hero Banner ─────────────────────────────────────────────────── */}
       <div className="relative overflow-hidden rounded-2xl border border-accent/20"
         style={{ background: 'linear-gradient(135deg, #060c1e 0%, #0b1a3a 50%, #0f2040 100%)' }}>
-        <div className="absolute right-0 top-0 bottom-0 opacity-[0.07] flex items-center pr-4 select-none pointer-events-none">
-          <img src="/sluggers-s.svg" alt="" className="h-48 w-48" />
-        </div>
         <div className="relative p-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div>
-              <div className="text-accent text-xs uppercase tracking-widest font-semibold mb-1">2026 Season</div>
-              <h1 className="text-5xl font-black text-white tracking-tight leading-none">
-                Sluggers
-                <span className="text-gold"> Hamly</span>
+              {team?.season && (
+                <div className="text-accent text-xs uppercase tracking-widest font-semibold mb-1">{team.season} Season</div>
+              )}
+              <h1 className="text-5xl font-black tracking-tight leading-none" style={{ color: team?.color || '#ffffff' }}>
+                {team?.name || '—'}
               </h1>
-              <p className="text-muted mt-1">9U Travel Ball</p>
+              {team?.league && <p className="text-muted mt-1">{team.league}</p>}
             </div>
             <div className="flex items-center gap-8">
               <div className="text-center">

@@ -88,7 +88,7 @@ function AddPlayerModal({ onClose, onSuccess, teamId }) {
 
 export default function Roster() {
   const queryClient = useQueryClient();
-  const { teamId } = useTeam();
+  const { teamId, team } = useTeam();
   const tp = useTeamPath();
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -130,7 +130,7 @@ export default function Roster() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-black text-white">Roster</h1>
-          <p className="text-muted text-sm mt-0.5">Sluggers - Hamly 9U · {players.length} players</p>
+          <p className="text-muted text-sm mt-0.5">{team?.name} · {players.length} players</p>
         </div>
         <button className="btn-primary" onClick={() => setShowModal(true)}>+ Add Player</button>
       </div>
