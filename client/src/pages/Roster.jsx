@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getPlayers, createPlayer, deletePlayer, getTeams, addPlayerToTeam } from '../api/client.js';
+import { useTeam, useTeamPath } from '../context/TeamContext.jsx';
+import { getPlayers, createPlayer, deletePlayer, addPlayerToTeam } from '../api/client.js';
 
 const POSITIONS = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'OF', 'EH', 'DH'];
 
@@ -87,13 +88,16 @@ function AddPlayerModal({ onClose, onSuccess, teamId }) {
 
 export default function Roster() {
   const queryClient = useQueryClient();
+  const { teamId } = useTeam();
+  const tp = useTeamPath();
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
 
-  const { data: players = [], isLoading: playersLoading } = useQuery({ queryKey: ['players'], queryFn: getPlayers });
-  const { data: teams = [], isLoading: teamsLoading } = useQuery({ queryKey: ['teams'], queryFn: getTeams });
-  const loading = playersLoading || teamsLoading;
-  const teamId = teams[0]?.id ?? null;
+  const { data: players = [], isLoading: loading } = useQuery({
+    queryKey: ['team', teamId, 'roster'],
+    queryFn: () => getPlayers().then(all => all.filter(p => p.teams?.some(t => t.id === teamId))),
+    enabled: !!teamId,
+  });
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -161,7 +165,7 @@ export default function Roster() {
             const jersey = player.jersey_number ||
               player.teams?.find(t => t.jersey_number)?.jersey_number;
             return (
-              <Link key={player.id} to={`/players/${player.id}`}
+              <Link key={player.id} to={tp(`/players/${player.id}`)}
                 className="card p-5 hover:border-accent/30 transition-all group flex flex-col">
                 <div className="flex items-start gap-3 mb-3">
                   {/* Jersey badge */}

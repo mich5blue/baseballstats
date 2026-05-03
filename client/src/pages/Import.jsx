@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTeamPath } from '../context/TeamContext.jsx';
 import { importImage, commitBoxscore, importExcel, importScorebookAnalyze, applyHitZones } from '../api/client.js';
 
 // ─── Drag-and-drop upload zone ────────────────────────────────────────────────
@@ -349,7 +350,7 @@ function ReviewScreen({ parsed, fileName, onCommit, onReset }) {
 }
 
 // ─── Success screen ───────────────────────────────────────────────────────────
-function SuccessScreen({ result, onReset }) {
+function SuccessScreen({ result, onReset, tp }) {
   const navigate = useNavigate();
   return (
     <div className="text-center py-12 space-y-6">
@@ -358,13 +359,13 @@ function SuccessScreen({ result, onReset }) {
       <p className="text-muted text-lg">{result.message}</p>
       <div className="flex items-center justify-center gap-4 flex-wrap">
         <button
-          onClick={() => navigate(`/teams/${result.teamId}`)}
+          onClick={() => navigate(tp('/dashboard'))}
           className="btn-primary px-6 py-3"
         >
           View Team: {result.teamName} →
         </button>
         <button
-          onClick={() => navigate(`/games/${result.gameId}`)}
+          onClick={() => navigate(tp(`/games/${result.gameId}`))}
           className="btn-secondary px-6 py-3"
         >
           View Game →
@@ -579,6 +580,7 @@ function ExcelSection() {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function Import() {
+  const tp = useTeamPath();
   const [stage, setStage] = useState('upload'); // 'upload' | 'review' | 'success'
   const [parsed, setParsed] = useState(null);
   const [fileName, setFileName] = useState('');
@@ -694,7 +696,7 @@ export default function Import() {
         )}
 
         {stage === 'success' && successResult && (
-          <SuccessScreen result={successResult} onReset={reset} />
+          <SuccessScreen result={successResult} onReset={reset} tp={tp} />
         )}
       </div>
 

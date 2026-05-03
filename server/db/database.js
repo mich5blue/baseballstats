@@ -144,10 +144,28 @@ async function initSchema() {
   const migrations = [
     'ALTER TABLE at_bats ADD COLUMN hit_zones TEXT',
     'ALTER TABLE players ADD COLUMN jersey_number TEXT',
+    'ALTER TABLE teams ADD COLUMN slug TEXT',
+    'ALTER TABLE teams ADD COLUMN pin TEXT',
   ];
   for (const m of migrations) {
     try { await client.execute(m); } catch (_) { /* already exists */ }
   }
+
+  // Auto-generate slugs for any teams that don't have one yet
+  try {
+    const teamsWithoutSlug = await client.execute(
+      "SELECT id, name FROM teams WHERE slug IS NULL OR slug = ''"
+    );
+    for (const row of teamsWithoutSlug.rows) {
+      const slug = String(row.name)
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+      await client.execute({ sql: 'UPDATE teams SET slug = ? WHERE id = ?', args: [slug, row.id] });
+    }
+  } catch (_) { /* best effort */ }
 }
 
 module.exports = { initDb, getDb };

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTeamPath } from '../context/TeamContext.jsx';
 import { getPlayerStats, updatePlayer } from '../api/client.js';
 import SortableTable from '../components/SortableTable.jsx';
 import SprayChart from '../components/SprayChart.jsx';
@@ -121,6 +122,7 @@ export default function PlayerProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const tp = useTeamPath();
   const [featuring, setFeaturing] = useState(false);
   const [editingZones, setEditingZones] = useState(false);
   // Patched zones: { [atBatId]: parsedZonesArray } — updated immediately on editor save
@@ -247,7 +249,7 @@ export default function PlayerProfile() {
   if (!data) return (
     <div className="max-w-4xl mx-auto px-4 py-12 text-center">
       <p className="text-muted text-lg">Player not found.</p>
-      <Link to="/roster" className="text-accent hover:underline mt-2 inline-block">← Roster</Link>
+      <Link to={tp("/roster")} className="text-accent hover:underline mt-2 inline-block">← Roster</Link>
     </div>
   );
 
@@ -272,7 +274,7 @@ export default function PlayerProfile() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <Link to="/roster" className="text-muted text-sm hover:text-white mb-4 inline-block">← Roster</Link>
+      <Link to={tp("/roster")} className="text-muted text-sm hover:text-white mb-4 inline-block">← Roster</Link>
 
       {/* ── Player Hero Card ─────────────────────────────────────────────────── */}
       <div className="card p-6 mb-6 relative overflow-hidden">

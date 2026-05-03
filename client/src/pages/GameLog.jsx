@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getGames, getTeams, createGame } from '../api/client.js';
+import { useTeam, useTeamPath } from '../context/TeamContext.jsx';
+import { getGames, createGame } from '../api/client.js';
 import SortableTable from '../components/SortableTable.jsx';
 import GameForm from '../components/GameForm.jsx';
 
@@ -20,19 +21,19 @@ function getResult(game) {
 export default function GameLog() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [teamFilter, setTeamFilter] = useState('');
+  const { teamId, team } = useTeam();
+  const tp = useTeamPath();
   const [showModal, setShowModal] = useState(false);
 
-  const { data: games = [], isLoading: gamesLoading } = useQuery({
-    queryKey: ['games', teamFilter || null],
-    queryFn: () => getGames(teamFilter || undefined),
+  const { data: games = [], isLoading: loading } = useQuery({
+    queryKey: ['games', teamId],
+    queryFn: () => getGames(teamId),
+    enabled: !!teamId,
   });
-  const { data: teams = [], isLoading: teamsLoading } = useQuery({ queryKey: ['teams'], queryFn: getTeams });
-  const loading = gamesLoading || teamsLoading;
 
   const handleCreate = async (data) => {
-    await createGame(data);
-    queryClient.invalidateQueries({ queryKey: ['games'] });
+    await createGame({ ...data, team_id: teamId });
+    queryClient.invalidateQueries({ queryKey: ['games', teamId] });
     setShowModal(false);
   };
 
@@ -115,22 +116,6 @@ export default function GameLog() {
         <button className="btn-primary" onClick={() => setShowModal(true)}>+ Add Game</button>
       </div>
 
-      {/* Filter */}
-      <div className="mb-5 flex gap-3 flex-wrap">
-        <select
-          value={teamFilter}
-          onChange={e => setTeamFilter(e.target.value)}
-          className="select-field w-auto min-w-[180px]"
-        >
-          <option value="">All Teams</option>
-          {teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-        </select>
-        {teamFilter && (
-          <button className="btn-secondary text-sm px-3" onClick={() => setTeamFilter('')}>
-            Clear Filter ✕
-          </button>
-        )}
-      </div>
 
       {loading ? (
         <div className="flex items-center justify-center h-48">
@@ -140,7 +125,7 @@ export default function GameLog() {
         <SortableTable
           columns={columns}
           data={games}
-          onRowClick={(game) => navigate(`/games/${game.id}`)}
+          onRowClick={(game) => navigate(tp(`/games/${game.id}`))}
           defaultSortField="game_date"
           defaultSortDesc={true}
           emptyMessage="No games logged yet. Add your first game!"

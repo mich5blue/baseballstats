@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getFeaturedStats, getGames, getTeams, getTeamStats } from '../api/client.js';
+import { useTeam, useTeamPath } from '../context/TeamContext.jsx';
+import { getFeaturedStats, getGames, getTeamStats } from '../api/client.js';
 
 function formatDate(d) {
   if (!d) return '—';
@@ -36,18 +37,22 @@ function TeamTotalTile({ label, value, sub, color = 'text-white' }) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { teamId } = useTeam();
+  const tp = useTeamPath();
 
   const { data: featured = null } = useQuery({ queryKey: ['featured'], queryFn: () => getFeaturedStats().catch(() => null) });
-  const { data: allGames = [], isLoading: gamesLoading } = useQuery({ queryKey: ['games'], queryFn: () => getGames().catch(() => []) });
-  const { data: teams = [], isLoading: teamsLoading } = useQuery({ queryKey: ['teams'], queryFn: () => getTeams().catch(() => []) });
-  const teamId = teams[0]?.id ?? null;
+  const { data: allGames = [], isLoading: gamesLoading } = useQuery({
+    queryKey: ['games', teamId],
+    queryFn: () => getGames(teamId),
+    enabled: !!teamId,
+  });
   const { data: teamStats = null, isLoading: statsLoading } = useQuery({
     queryKey: ['team', teamId, 'stats'],
     queryFn: () => getTeamStats(teamId),
     enabled: !!teamId,
   });
 
-  const loading = gamesLoading || teamsLoading || (!!teamId && statsLoading);
+  const loading = gamesLoading || statsLoading;
 
   const games = useMemo(() =>
     [...allGames].sort((a, b) => (b.game_date || '').localeCompare(a.game_date || '')),
@@ -149,7 +154,7 @@ export default function Dashboard() {
                   <span>Bats {featured.player.bats} · Throws {featured.player.throws}</span>
                 </div>
               </div>
-              <Link to={`/players/${featured.player.id}`} className="btn-secondary text-sm">
+              <Link to={tp(`/players/${featured.player.id}`)} className="btn-secondary text-sm">
                 View Profile →
               </Link>
             </div>
@@ -175,19 +180,19 @@ export default function Dashboard() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-white">Recent Games</h2>
-              <Link to="/games" className="text-accent text-sm hover:underline">All games →</Link>
+              <Link to={tp("/games")} className="text-accent text-sm hover:underline">All games →</Link>
             </div>
             {recentGames.length === 0 ? (
               <div className="card p-8 text-center">
                 <p className="text-muted text-sm mb-3">No games logged yet.</p>
-                <Link to="/import" className="btn-primary text-sm">Import Box Score</Link>
+                <Link to={tp("/admin")} className="btn-primary text-sm">Import Box Score</Link>
               </div>
             ) : (
               <div className="space-y-2">
                 {recentGames.map(game => {
                   const result = getResult(game);
                   return (
-                    <button key={game.id} onClick={() => navigate(`/games/${game.id}`)}
+                    <button key={game.id} onClick={() => navigate(tp(`/games/${game.id}`))}
                       className="w-full card p-4 flex items-center justify-between hover:border-accent/30 transition-all group text-left">
                       <div className="flex items-center gap-3">
                         <div className={`w-9 h-9 rounded-lg flex items-center justify-center font-black text-base flex-shrink-0 ${
@@ -257,11 +262,11 @@ export default function Dashboard() {
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
                   <span className="text-accent text-base">⚾</span> Batting Leaders
                 </h2>
-                <Link to="/stats" className="text-accent text-sm hover:underline">Full stats →</Link>
+                <Link to={tp("/stats")} className="text-accent text-sm hover:underline">Full stats →</Link>
               </div>
               <div className="space-y-2">
                 {battingLeaders.map((p, i) => (
-                  <Link key={p.player_id} to={`/players/${p.player_id}`}
+                  <Link key={p.player_id} to={tp(`/players/${p.player_id}`)}
                     className="card p-3 flex items-center justify-between hover:border-accent/30 transition-all group">
                     <div className="flex items-center gap-3">
                       <span className="text-muted text-xs w-4 font-mono">{i + 1}</span>
@@ -295,11 +300,11 @@ export default function Dashboard() {
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
                   <span className="text-gold text-base">💪</span> Pitching Leaders
                 </h2>
-                <Link to="/stats" className="text-gold text-sm hover:underline">Full stats →</Link>
+                <Link to={tp("/stats")} className="text-gold text-sm hover:underline">Full stats →</Link>
               </div>
               <div className="space-y-2">
                 {pitchingLeaders.map((p, i) => (
-                  <Link key={p.player_id} to={`/players/${p.player_id}`}
+                  <Link key={p.player_id} to={tp(`/players/${p.player_id}`)}
                     className="card p-3 flex items-center justify-between hover:border-accent/30 transition-all group">
                     <div className="flex items-center gap-3">
                       <span className="text-muted text-xs w-4 font-mono">{i + 1}</span>

@@ -8,6 +8,8 @@ const api = axios.create({
 // Teams
 export const getTeams = () => api.get('/teams').then(r => r.data);
 export const getTeam = (id) => api.get(`/teams/${id}`).then(r => r.data);
+export const getTeamBySlug = (slug) => api.get(`/teams/slug/${slug}`).then(r => r.data);
+export const verifyTeamPin = (slug, pin) => api.post('/teams/verify-pin', { slug, pin }).then(r => r.data);
 export const createTeam = (data) => api.post('/teams', data).then(r => r.data);
 export const updateTeam = (id, data) => api.put(`/teams/${id}`, data).then(r => r.data);
 export const deleteTeam = (id) => api.delete(`/teams/${id}`).then(r => r.data);

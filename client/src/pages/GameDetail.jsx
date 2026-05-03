@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTeamPath } from '../context/TeamContext.jsx';
 import {
   getGame, updateGame, getAtBats, createAtBat, updateAtBat, deleteAtBat,
   getPitching, createPitching, updatePitching, deletePitching
@@ -27,6 +28,7 @@ function getResult(game) {
 export default function GameDetail() {
   const { id } = useParams();
   const queryClient = useQueryClient();
+  const tp = useTeamPath();
   const [editGame, setEditGame] = useState(false);
   const [atBatModal, setAtBatModal] = useState(null); // null | 'add' | record
   const [pitchingModal, setPitchingModal] = useState(null);
@@ -48,7 +50,7 @@ export default function GameDetail() {
     {
       header: 'Player', accessorKey: 'player_name',
       cell: i => (
-        <Link to={`/players/${i.row.original.player_id}`} className="text-white hover:text-accent font-medium">
+        <Link to={tp(`/players/${i.row.original.player_id}`)} className="text-white hover:text-accent font-medium">
           {i.getValue()}
         </Link>
       )
@@ -92,7 +94,7 @@ export default function GameDetail() {
     {
       header: 'Pitcher', accessorKey: 'player_name',
       cell: i => (
-        <Link to={`/players/${i.row.original.player_id}`} className="text-white hover:text-accent font-medium">
+        <Link to={tp(`/players/${i.row.original.player_id}`)} className="text-white hover:text-accent font-medium">
           {i.getValue()}
         </Link>
       )
@@ -162,7 +164,7 @@ export default function GameDetail() {
   if (!game) return (
     <div className="max-w-7xl mx-auto px-4 py-12 text-center">
       <p className="text-muted text-lg">Game not found.</p>
-      <Link to="/games" className="text-accent hover:underline mt-2 inline-block">← Back to Games</Link>
+      <Link to={tp("/games")} className="text-accent hover:underline mt-2 inline-block">← Back to Games</Link>
     </div>
   );
 
@@ -170,7 +172,7 @@ export default function GameDetail() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-muted mb-4">
-        <Link to="/games" className="hover:text-white">Games</Link>
+        <Link to={tp("/games")} className="hover:text-white">Games</Link>
         <span>›</span>
         <Link to={`/teams/${game.team_id}`} className="hover:text-white" style={{ color: game.team_color }}>
           {game.team_name}

@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getTeams, getTeamStats, getGames } from '../api/client.js';
+import { useTeam, useTeamPath } from '../context/TeamContext.jsx';
+import { getTeamStats, getGames } from '../api/client.js';
 import SortableTable from '../components/SortableTable.jsx';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -45,7 +46,7 @@ function statFmt(val, decimals = 3) {
   return n.toFixed(decimals);
 }
 
-function LeaderCard({ label, emoji, players, statKey, statLabel, format, higherBetter = true, link = true }) {
+function LeaderCard({ label, emoji, players, statKey, statLabel, format, higherBetter = true, link = true, tp = x => x }) {
   const sorted = [...players]
     .filter(p => p[statKey] !== null && p[statKey] !== undefined && p[statKey] !== '---')
     .sort((a, b) => higherBetter
@@ -70,7 +71,7 @@ function LeaderCard({ label, emoji, players, statKey, statLabel, format, higherB
                 {i + 1}
               </span>
               {link ? (
-                <Link to={`/players/${p.player_id}`}
+                <Link to={tp(`/players/${p.player_id}`)}
                   className={`text-sm truncate font-semibold hover:text-accent transition-colors ${i === 0 ? 'text-white' : 'text-muted'}`}>
                   {p.player_name}
                 </Link>
@@ -126,22 +127,19 @@ function TotalsRow({ data, columns }) {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function TeamStats() {
-  const [teamId, setTeamId] = useState(null);
-  const [tab, setTab]       = useState('batting');
-
-  const { data: teams = [] } = useQuery({ queryKey: ['teams'], queryFn: getTeams });
-
-  const resolvedTeamId = teamId ?? teams[0]?.id ?? null;
+  const { teamId } = useTeam();
+  const tp = useTeamPath();
+  const [tab, setTab] = useState('batting');
 
   const { data: stats = { batting: [], pitching: [] }, isLoading: statsLoading } = useQuery({
-    queryKey: ['team', resolvedTeamId, 'stats'],
-    queryFn: () => getTeamStats(resolvedTeamId),
-    enabled: !!resolvedTeamId,
+    queryKey: ['team', teamId, 'stats'],
+    queryFn: () => getTeamStats(teamId),
+    enabled: !!teamId,
   });
   const { data: games = [], isLoading: gamesLoading } = useQuery({
-    queryKey: ['games', resolvedTeamId],
-    queryFn: () => getGames(resolvedTeamId),
-    enabled: !!resolvedTeamId,
+    queryKey: ['games', teamId],
+    queryFn: () => getGames(teamId),
+    enabled: !!teamId,
   });
   const loading = statsLoading || gamesLoading;
 
@@ -158,13 +156,12 @@ export default function TeamStats() {
 
   const teamBat  = useMemo(() => calcTeamBatting(stats.batting), [stats.batting]);
   const teamPitch = useMemo(() => calcTeamPitching(stats.pitching), [stats.pitching]);
-  const currentTeam = teams.find(t => t.id === resolvedTeamId);
 
   // ── Batting columns ─────────────────────────────────────────────────────────
   const battingCols = useMemo(() => [
     { header: 'Player', accessorKey: 'player_name', defaultSort: false,
       cell: i => (
-        <Link to={`/players/${i.row.original.player_id}`}
+        <Link to={tp(`/players/${i.row.original.player_id}`)}
           className="text-white hover:text-accent font-semibold whitespace-nowrap">
           {i.getValue()}
         </Link>
@@ -208,7 +205,7 @@ export default function TeamStats() {
   const pitchingCols = useMemo(() => [
     { header: 'Player', accessorKey: 'player_name', defaultSort: false,
       cell: i => (
-        <Link to={`/players/${i.row.original.player_id}`}
+        <Link to={tp(`/players/${i.row.original.player_id}`)}
           className="text-white hover:text-accent font-semibold whitespace-nowrap">
           {i.getValue()}
         </Link>
@@ -277,17 +274,6 @@ export default function TeamStats() {
             </p>
           )}
         </div>
-        {teams.length > 1 && (
-          <select
-            value={resolvedTeamId || ''}
-            onChange={e => setTeamId(Number(e.target.value))}
-            className="select-field text-sm"
-          >
-            {teams.map(t => (
-              <option key={t.id} value={t.id}>{t.name}</option>
-            ))}
-          </select>
-        )}
       </div>
 
       {loading ? (
@@ -320,13 +306,13 @@ export default function TeamStats() {
           {/* ── Stat leaders ────────────────────────────────────────────────── */}
           {(stats.batting.length > 0 || stats.pitching.length > 0) && (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-              <LeaderCard label="Batting Avg"  emoji="🎯" players={stats.batting}  statKey="avg"            statLabel="AVG" />
-              <LeaderCard label="On-Base %"    emoji="👟" players={stats.batting}  statKey="obp"            statLabel="OBP" />
-              <LeaderCard label="RBI"          emoji="💥" players={stats.batting}  statKey="rbi"            statLabel="Run Batted In" />
-              <LeaderCard label="Stolen Bases" emoji="💨" players={stats.batting}  statKey="stolen_bases"   statLabel="SB" />
+              <LeaderCard tp={tp} label="Batting Avg"  emoji="🎯" players={stats.batting}  statKey="avg"            statLabel="AVG" />
+              <LeaderCard tp={tp} label="On-Base %"    emoji="👟" players={stats.batting}  statKey="obp"            statLabel="OBP" />
+              <LeaderCard tp={tp} label="RBI"          emoji="💥" players={stats.batting}  statKey="rbi"            statLabel="Run Batted In" />
+              <LeaderCard tp={tp} label="Stolen Bases" emoji="💨" players={stats.batting}  statKey="stolen_bases"   statLabel="SB" />
               {stats.pitching.length > 0 && <>
-                <LeaderCard label="ERA"          emoji="🔥" players={stats.pitching} statKey="era"            statLabel="Earned Run Avg" higherBetter={false} format={v => parseFloat(v).toFixed(2)} />
-                <LeaderCard label="Strikeouts"   emoji="⚡" players={stats.pitching} statKey="strikeouts"     statLabel="K" />
+                <LeaderCard tp={tp} label="ERA"          emoji="🔥" players={stats.pitching} statKey="era"            statLabel="Earned Run Avg" higherBetter={false} format={v => parseFloat(v).toFixed(2)} />
+                <LeaderCard tp={tp} label="Strikeouts"   emoji="⚡" players={stats.pitching} statKey="strikeouts"     statLabel="K" />
               </>}
             </div>
           )}
