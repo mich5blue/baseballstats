@@ -65,12 +65,12 @@ async function migrate() {
   }
 
   async function insertRow(sql, args) {
+    // Use OR REPLACE so existing rows are updated (not skipped)
+    const upsertSql = sql.replace(/^INSERT INTO/, 'INSERT OR REPLACE INTO');
     try {
-      await remote.execute({ sql, args });
+      await remote.execute({ sql: upsertSql, args });
     } catch (e) {
-      if (!e.message.includes('UNIQUE')) {
-        console.warn(`   ⚠️  Skipped: ${e.message.slice(0, 100)}`);
-      }
+      console.warn(`   ⚠️  Skipped: ${e.message.slice(0, 100)}`);
     }
   }
 
