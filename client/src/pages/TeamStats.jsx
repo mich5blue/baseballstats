@@ -28,6 +28,8 @@ function calcTeamPitching(rows) {
     ['innings_pitched','hits_allowed','runs_allowed','earned_runs','walks',
      'strikeouts','home_runs_allowed','pitches','strikes','wins','losses','saves','games'
     ].forEach(f => acc[f] = (acc[f] || 0) + (Number(r[f]) || 0));
+    // Only count pitches from games where strikes were tracked
+    acc.pitches_tracked = (acc.pitches_tracked || 0) + ((Number(r.strikes) || 0) > 0 ? (Number(r.pitches) || 0) : 0);
     return acc;
   }, {});
   t.era  = t.innings_pitched > 0 ? ((t.earned_runs / t.innings_pitched) * 9).toFixed(2) : '---';
@@ -245,7 +247,7 @@ export default function TeamStats() {
     },
     { header: 'HR',  accessorKey: 'home_runs_allowed' },
     { header: 'S%',  id: 'spct',
-      accessorFn: r => r.pitches > 0 ? Math.round((r.strikes || 0) / r.pitches * 100) : null,
+      accessorFn: r => r.pitches_tracked > 0 ? Math.round((r.strikes || 0) / r.pitches_tracked * 100) : null,
       cell: i => {
         const v = i.getValue();
         return <span className={`font-mono ${v >= 60 ? 'text-emerald-400' : v < 50 ? 'text-red-400' : 'text-white'}`}>
@@ -253,8 +255,8 @@ export default function TeamStats() {
         </span>;
       },
       totalsCell: v => {
-        const pct = teamPitch?.pitches > 0
-          ? Math.round((teamPitch.strikes || 0) / teamPitch.pitches * 100) : null;
+        const pct = teamPitch?.pitches_tracked > 0
+          ? Math.round((teamPitch.strikes || 0) / teamPitch.pitches_tracked * 100) : null;
         return <span>{pct !== null ? pct + '%' : '—'}</span>;
       }
     },

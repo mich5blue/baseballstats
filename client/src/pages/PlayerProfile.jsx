@@ -227,8 +227,8 @@ export default function PlayerProfile() {
     { header: 'P', accessorKey: 'pitches', cell: i => <span className="text-muted">{i.getValue() || 0}</span> },
     { header: 'B', id: 'balls', accessorFn: r => (r.pitches||0) - (r.strikes||0), cell: i => <span className="text-muted">{i.getValue()}</span> },
     { header: 'S', accessorKey: 'strikes', cell: i => <span className="text-white">{i.getValue() || 0}</span> },
-    { header: 'S%', id: 'spct', accessorFn: r => r.pitches > 0 ? Math.round((r.strikes||0)/r.pitches*100) : null,
-      cell: i => { const v = i.getValue(); return <span className={`font-mono ${v >= 60 ? 'text-emerald-400' : v < 50 ? 'text-red-400' : 'text-white'}`}>{v !== null ? v+'%' : '—'}</span>; }
+    { header: 'S%', id: 'spct', accessorFn: r => (r.strikes > 0 && r.pitches > 0) ? Math.round(r.strikes/r.pitches*100) : null,
+      cell: i => { const v = i.getValue(); return <span className={`font-mono ${v >= 60 ? 'text-emerald-400' : v !== null && v < 50 ? 'text-red-400' : 'text-white'}`}>{v !== null ? v+'%' : '—'}</span>; }
     },
     { header: 'ERA', accessorKey: 'era', cell: i => <span className="font-mono text-accent">{i.getValue()}</span> },
     { header: 'WHIP', accessorKey: 'whip', cell: i => <span className="font-mono">{i.getValue()}</span> },
@@ -407,10 +407,10 @@ export default function PlayerProfile() {
                 <StatBadge label="P" value={overallPitching.pitches ?? 0} color="text-white" />
                 <StatBadge label="S" value={overallPitching.strikes ?? 0} color="text-white" />
                 <StatBadge label="S%"
-                  value={(overallPitching.pitches > 0)
-                    ? Math.round((overallPitching.strikes || 0) / overallPitching.pitches * 100) + '%'
+                  value={(overallPitching.pitches_tracked > 0)
+                    ? Math.round((overallPitching.strikes || 0) / overallPitching.pitches_tracked * 100) + '%'
                     : '—'}
-                  color={(overallPitching.pitches > 0 && Math.round((overallPitching.strikes||0)/overallPitching.pitches*100) >= 60) ? 'text-emerald-400' : 'text-white'}
+                  color={(overallPitching.pitches_tracked > 0 && Math.round((overallPitching.strikes||0)/overallPitching.pitches_tracked*100) >= 60) ? 'text-emerald-400' : 'text-white'}
                 />
               </div>
             </div>

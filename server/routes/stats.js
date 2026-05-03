@@ -86,6 +86,7 @@ router.get('/team/:teamId', async (req, res) => {
         SUM(ps.home_runs_allowed) as home_runs_allowed,
         SUM(ps.pitches) as pitches,
         SUM(ps.strikes) as strikes,
+        SUM(CASE WHEN ps.strikes > 0 THEN ps.pitches ELSE 0 END) as pitches_tracked,
         SUM(ps.win) as wins,
         SUM(ps.loss) as losses,
         SUM(ps.save_stat) as saves
@@ -171,6 +172,8 @@ router.get('/player/:playerId', async (req, res) => {
         ['innings_pitched', 'hits_allowed', 'runs_allowed', 'earned_runs', 'walks',
           'strikeouts', 'home_runs_allowed', 'pitches', 'strikes', 'win', 'loss', 'save_stat'
         ].forEach(f => acc[f] = (acc[f] || 0) + (row[f] || 0));
+        // Only count pitches from games where strikes were tracked
+        acc.pitches_tracked = (acc.pitches_tracked || 0) + ((row.strikes || 0) > 0 ? (row.pitches || 0) : 0);
         return acc;
       }, {});
 
@@ -188,6 +191,7 @@ router.get('/player/:playerId', async (req, res) => {
         SUM(walks) as walks, SUM(strikeouts) as strikeouts,
         SUM(home_runs_allowed) as home_runs_allowed, SUM(pitches) as pitches,
         SUM(strikes) as strikes,
+        SUM(CASE WHEN strikes > 0 THEN pitches ELSE 0 END) as pitches_tracked,
         SUM(win) as wins, SUM(loss) as losses, SUM(save_stat) as saves,
         COUNT(DISTINCT game_id) as games
       FROM pitching_stats WHERE player_id = ?
