@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getTeam, getTeamRoster, getGames, getTeamStats, getPlayers,
   addPlayerToTeam, removePlayerFromTeam, createGame, updateGame, deleteGame,
@@ -121,28 +122,24 @@ function AddPlayerModal({ teamId, onClose, onSuccess }) {
 export default function TeamDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [team, setTeam] = useState(null);
-  const [roster, setRoster] = useState([]);
-  const [games, setGames] = useState([]);
-  const [stats, setStats] = useState({ batting: [], pitching: [] });
+  const queryClient = useQueryClient();
   const [tab, setTab] = useState('roster');
   const [gameModal, setGameModal] = useState(null);
   const [playerModal, setPlayerModal] = useState(false);
-  const [loading, setLoading] = useState(true);
 
-  const loadData = () => {
-    Promise.all([
-      getTeam(id),
-      getTeamRoster(id),
-      getGames(id),
-      getTeamStats(id)
-    ]).then(([t, r, g, s]) => {
-      setTeam(t); setRoster(r); setGames(g); setStats(s);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+  const { data: team = null, isLoading: teamLoading } = useQuery({ queryKey: ['team', id], queryFn: () => getTeam(id) });
+  const { data: roster = [], isLoading: rosterLoading } = useQuery({ queryKey: ['team', id, 'roster'], queryFn: () => getTeamRoster(id) });
+  const { data: games = [], isLoading: gamesLoading } = useQuery({ queryKey: ['games', id], queryFn: () => getGames(id) });
+  const { data: stats = { batting: [], pitching: [] }, isLoading: statsLoading } = useQuery({ queryKey: ['team', id, 'stats'], queryFn: () => getTeamStats(id) });
+  const loading = teamLoading || rosterLoading || gamesLoading || statsLoading;
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ['team', id] });
+    queryClient.invalidateQueries({ queryKey: ['games', id] });
+    queryClient.invalidateQueries({ queryKey: ['games'] });
+    queryClient.invalidateQueries({ queryKey: ['players'] });
+    queryClient.invalidateQueries({ queryKey: ['featured'] });
   };
-
-  useEffect(() => { loadData(); }, [id]);
 
   const battingCols = useMemo(() => [
     { header: 'Player', accessorKey: 'player_name', cell: i => <Link to={`/players/${i.row.original.player_id}`} className="text-white hover:text-accent font-medium">{i.getValue()}</Link> },
@@ -223,7 +220,7 @@ export default function TeamDetail() {
           <button className="p-1 text-muted hover:text-red-400" onClick={async () => {
             if (!confirm('Delete this game?')) return;
             await deleteGame(i.row.original.id);
-            loadData();
+            invalidate();
           }}>🗑️</button>
         </div>
       )
@@ -307,7 +304,7 @@ export default function TeamDetail() {
                     onClick={async () => {
                       if (!confirm(`Remove ${player.name} from this team?`)) return;
                       await removePlayerFromTeam(player.id, id);
-                      loadData();
+                      invalidate();
                     }}
                   >
                     ✕
@@ -378,7 +375,7 @@ export default function TeamDetail() {
               onSubmit={async (data) => {
                 if (gameModal === 'add') await createGame({ ...data, team_id: parseInt(id) });
                 else await updateGame(gameModal.id, data);
-                loadData();
+                invalidate();
                 setGameModal(null);
               }}
               onCancel={() => setGameModal(null)}

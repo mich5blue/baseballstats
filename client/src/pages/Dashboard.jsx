@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { getFeaturedStats, getGames, getTeams, getTeamStats } from '../api/client.js';
 
 function formatDate(d) {
@@ -35,73 +36,57 @@ function TeamTotalTile({ label, value, sub, color = 'text-white' }) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [featured, setFeatured] = useState(null);
-  const [games, setGames] = useState([]);
-  const [battingLeaders, setBattingLeaders] = useState([]);
-  const [pitchingLeaders, setPitchingLeaders] = useState([]);
-  const [teamTotals, setTeamTotals] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    Promise.all([
-      getFeaturedStats().catch(() => null),
-      getGames().catch(() => []),
-      getTeams().catch(() => [])
-    ]).then(async ([feat, allGames, teams]) => {
-      setFeatured(feat);
-      setGames(allGames.sort((a, b) => (b.game_date || '').localeCompare(a.game_date || '')));
+  const { data: featured = null } = useQuery({ queryKey: ['featured'], queryFn: () => getFeaturedStats().catch(() => null) });
+  const { data: allGames = [], isLoading: gamesLoading } = useQuery({ queryKey: ['games'], queryFn: () => getGames().catch(() => []) });
+  const { data: teams = [], isLoading: teamsLoading } = useQuery({ queryKey: ['teams'], queryFn: () => getTeams().catch(() => []) });
+  const teamId = teams[0]?.id ?? null;
+  const { data: teamStats = null, isLoading: statsLoading } = useQuery({
+    queryKey: ['team', teamId, 'stats'],
+    queryFn: () => getTeamStats(teamId),
+    enabled: !!teamId,
+  });
 
-      if (teams.length > 0) {
-        try {
-          const stats = await getTeamStats(teams[0].id);
+  const loading = gamesLoading || teamsLoading || (!!teamId && statsLoading);
 
-          // Batting leaders — sorted by AVG, min 3 AB
-          const batting = (stats.batting || [])
-            .filter(p => p.ab >= 3)
-            .sort((a, b) => parseFloat(b.avg) - parseFloat(a.avg))
-            .slice(0, 5);
+  const games = useMemo(() =>
+    [...allGames].sort((a, b) => (b.game_date || '').localeCompare(a.game_date || '')),
+    [allGames]
+  );
 
-          // Pitching leaders — sorted by strike %, min 0.1 IP, show S% + WHIP
-          const pitching = (stats.pitching || [])
-            .filter(p => p.innings_pitched > 0 && p.pitches > 0)
-            .map(p => ({
-              ...p,
-              strike_pct: p.pitches > 0 ? Math.round((p.strikes || 0) / p.pitches * 100) : 0,
-            }))
-            .sort((a, b) => b.strike_pct - a.strike_pct)
-            .slice(0, 5);
+  const battingLeaders = useMemo(() => (teamStats?.batting || [])
+    .filter(p => p.ab >= 3)
+    .sort((a, b) => parseFloat(b.avg) - parseFloat(a.avg))
+    .slice(0, 5), [teamStats]);
 
-          setBattingLeaders(batting);
-          setPitchingLeaders(pitching);
+  const pitchingLeaders = useMemo(() => (teamStats?.pitching || [])
+    .filter(p => p.innings_pitched > 0 && p.pitches > 0)
+    .map(p => ({ ...p, strike_pct: p.pitches > 0 ? Math.round((p.strikes || 0) / p.pitches * 100) : 0 }))
+    .sort((a, b) => b.strike_pct - a.strike_pct)
+    .slice(0, 5), [teamStats]);
 
-          // Team season totals — sum all batting rows
-          const bat = stats.batting || [];
-          const pit = stats.pitching || [];
-          const totalAB   = bat.reduce((s, p) => s + (p.ab || 0), 0);
-          const totalH    = bat.reduce((s, p) => s + (p.hits || 0), 0);
-          const totalR    = bat.reduce((s, p) => s + (p.runs || 0), 0);
-          const totalRBI  = bat.reduce((s, p) => s + (p.rbi || 0), 0);
-          const totalBB   = bat.reduce((s, p) => s + (p.walks || 0), 0);
-          const totalK    = bat.reduce((s, p) => s + (p.strikeouts || 0), 0);
-          const totalHR   = bat.reduce((s, p) => s + (p.home_runs || 0), 0);
-          const totalSB   = bat.reduce((s, p) => s + (p.stolen_bases || 0), 0);
-          const totalHBP  = bat.reduce((s, p) => s + (p.hit_by_pitch || 0), 0);
-          const teamAVG   = totalAB > 0 ? (totalH / totalAB).toFixed(3).replace(/^0/, '') : '.000';
-          const obpNum    = totalAB > 0 ? (totalH + totalBB + totalHBP) / (totalAB + totalBB + totalHBP) : 0;
-          const teamOBP   = obpNum > 0 ? obpNum.toFixed(3).replace(/^0/, '') : '.000';
-
-          // Pitching totals
-          const totalPitches  = pit.reduce((s, p) => s + (p.pitches || 0), 0);
-          const totalStrikes  = pit.reduce((s, p) => s + (p.strikes || 0), 0);
-          const teamSPct      = totalPitches > 0 ? Math.round(totalStrikes / totalPitches * 100) : null;
-          const totalPitchK   = pit.reduce((s, p) => s + (p.strikeouts || 0), 0);
-
-          setTeamTotals({ totalR, totalH, totalRBI, totalHR, totalBB, totalK, totalSB, teamAVG, teamOBP, teamSPct, totalPitchK });
-        } catch (_) {}
-      }
-      setLoading(false);
-    });
-  }, []);
+  const teamTotals = useMemo(() => {
+    if (!teamStats) return null;
+    const bat = teamStats.batting || [];
+    const pit = teamStats.pitching || [];
+    const totalAB  = bat.reduce((s, p) => s + (p.ab || 0), 0);
+    const totalH   = bat.reduce((s, p) => s + (p.hits || 0), 0);
+    const totalR   = bat.reduce((s, p) => s + (p.runs || 0), 0);
+    const totalRBI = bat.reduce((s, p) => s + (p.rbi || 0), 0);
+    const totalBB  = bat.reduce((s, p) => s + (p.walks || 0), 0);
+    const totalK   = bat.reduce((s, p) => s + (p.strikeouts || 0), 0);
+    const totalHR  = bat.reduce((s, p) => s + (p.home_runs || 0), 0);
+    const totalSB  = bat.reduce((s, p) => s + (p.stolen_bases || 0), 0);
+    const totalHBP = bat.reduce((s, p) => s + (p.hit_by_pitch || 0), 0);
+    const teamAVG  = totalAB > 0 ? (totalH / totalAB).toFixed(3).replace(/^0/, '') : '.000';
+    const obpNum   = (totalAB + totalBB + totalHBP) > 0 ? (totalH + totalBB + totalHBP) / (totalAB + totalBB + totalHBP) : 0;
+    const teamOBP  = obpNum > 0 ? obpNum.toFixed(3).replace(/^0/, '') : '.000';
+    const totalPitches = pit.reduce((s, p) => s + (p.pitches || 0), 0);
+    const totalStrikes = pit.reduce((s, p) => s + (p.strikes || 0), 0);
+    const teamSPct     = totalPitches > 0 ? Math.round(totalStrikes / totalPitches * 100) : null;
+    const totalPitchK  = pit.reduce((s, p) => s + (p.strikeouts || 0), 0);
+    return { totalR, totalH, totalRBI, totalHR, totalBB, totalK, totalSB, teamAVG, teamOBP, teamSPct, totalPitchK };
+  }, [teamStats]);
 
   const wins = games.filter(g => getResult(g) === 'W').length;
   const losses = games.filter(g => getResult(g) === 'L').length;

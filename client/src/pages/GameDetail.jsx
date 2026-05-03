@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getGame, updateGame, getAtBats, createAtBat, updateAtBat, deleteAtBat,
   getPitching, createPitching, updatePitching, deletePitching
@@ -25,28 +26,21 @@ function getResult(game) {
 
 export default function GameDetail() {
   const { id } = useParams();
-  const [game, setGame] = useState(null);
-  const [atBats, setAtBats] = useState([]);
-  const [pitching, setPitching] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [editGame, setEditGame] = useState(false);
   const [atBatModal, setAtBatModal] = useState(null); // null | 'add' | record
   const [pitchingModal, setPitchingModal] = useState(null);
 
-  const loadData = () => {
-    Promise.all([
-      getGame(id),
-      getAtBats(id),
-      getPitching(id)
-    ]).then(([g, ab, p]) => {
-      setGame(g);
-      setAtBats(ab);
-      setPitching(p);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  };
+  const { data: game = null, isLoading: gameLoading } = useQuery({ queryKey: ['game', id], queryFn: () => getGame(id) });
+  const { data: atBats = [], isLoading: abLoading } = useQuery({ queryKey: ['game', id, 'at-bats'], queryFn: () => getAtBats(id) });
+  const { data: pitching = [], isLoading: pitchLoading } = useQuery({ queryKey: ['game', id, 'pitching'], queryFn: () => getPitching(id) });
+  const loading = gameLoading || abLoading || pitchLoading;
 
-  useEffect(() => { loadData(); }, [id]);
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ['game', id] });
+    queryClient.invalidateQueries({ queryKey: ['games'] });
+    queryClient.invalidateQueries({ queryKey: ['featured'] });
+  };
 
   const result = game ? getResult(game) : null;
 
@@ -86,7 +80,7 @@ export default function GameDetail() {
               e.stopPropagation();
               if (!confirm('Delete this at-bat record?')) return;
               await deleteAtBat(i.row.original.id);
-              loadData();
+              invalidate();
             }}
           >🗑️</button>
         </div>
@@ -151,7 +145,7 @@ export default function GameDetail() {
               e.stopPropagation();
               if (!confirm('Delete this pitching record?')) return;
               await deletePitching(i.row.original.id);
-              loadData();
+              invalidate();
             }}
           >🗑️</button>
         </div>
@@ -289,7 +283,7 @@ export default function GameDetail() {
               teamId={game.team_id}
               onSubmit={async (data) => {
                 await updateGame(game.id, data);
-                loadData();
+                invalidate();
                 setEditGame(false);
               }}
               onCancel={() => setEditGame(false)}
@@ -312,7 +306,7 @@ export default function GameDetail() {
               onSubmit={async (data) => {
                 if (atBatModal === 'add') await createAtBat(data);
                 else await updateAtBat(atBatModal.id, data);
-                loadData();
+                invalidate();
                 setAtBatModal(null);
               }}
               onCancel={() => setAtBatModal(null)}
@@ -335,7 +329,7 @@ export default function GameDetail() {
               onSubmit={async (data) => {
                 if (pitchingModal === 'add') await createPitching(data);
                 else await updatePitching(pitchingModal.id, data);
-                loadData();
+                invalidate();
                 setPitchingModal(null);
               }}
               onCancel={() => setPitchingModal(null)}

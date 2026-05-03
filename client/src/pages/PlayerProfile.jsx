@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPlayerStats, updatePlayer } from '../api/client.js';
 import SortableTable from '../components/SortableTable.jsx';
 import SprayChart from '../components/SprayChart.jsx';
@@ -119,33 +120,36 @@ function CycleBadge({ value, cycle, onSave, style }) {
 export default function PlayerProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [featuring, setFeaturing] = useState(false);
   const [editingZones, setEditingZones] = useState(false);
   // Patched zones: { [atBatId]: parsedZonesArray } — updated immediately on editor save
   const [zonePatches, setZonePatches] = useState({});
 
-  const load = () => {
-    getPlayerStats(id).then(d => { setData(d); setLoading(false); setZonePatches({}); })
-      .catch(() => setLoading(false));
-  };
+  const { data = null, isLoading: loading } = useQuery({
+    queryKey: ['player', id, 'stats'],
+    queryFn: () => getPlayerStats(id),
+  });
 
-  useEffect(() => { load(); }, [id]);
+  const invalidate = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['player', id, 'stats'] });
+    queryClient.invalidateQueries({ queryKey: ['featured'] });
+    setZonePatches({});
+  }, [queryClient, id]);
 
   const handleFeatureToggle = async () => {
     if (!data) return;
     setFeaturing(true);
     try {
       await updatePlayer(id, { is_featured: data.player.is_featured ? 0 : 1 });
-      load();
+      invalidate();
     } finally { setFeaturing(false); }
   };
 
   const handlePlayerUpdate = useCallback(async (field, value) => {
     await updatePlayer(id, { [field]: value });
-    load();
-  }, [id]);
+    invalidate();
+  }, [id, invalidate]);
 
   // Called by SprayChartEditor when a game's zones are saved
   const handleZonesSaved = useCallback((atBatId, newZones) => {

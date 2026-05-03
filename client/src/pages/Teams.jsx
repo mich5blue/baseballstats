@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getTeams, createTeam, updateTeam, deleteTeam } from '../api/client.js';
 
 function TeamModal({ initial, onSubmit, onClose }) {
@@ -65,25 +66,21 @@ function TeamModal({ initial, onSubmit, onClose }) {
 }
 
 export default function Teams() {
-  const [teams, setTeams] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [modal, setModal] = useState(null); // null | 'add' | team object
 
-  const load = () => {
-    setLoading(true);
-    getTeams().then(data => { setTeams(data); setLoading(false); }).catch(() => setLoading(false));
-  };
+  const { data: teams = [], isLoading: loading } = useQuery({ queryKey: ['teams'], queryFn: getTeams });
 
-  useEffect(() => { load(); }, []);
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['teams'] });
 
   const handleCreate = async (data) => {
     await createTeam(data);
-    load();
+    invalidate();
   };
 
   const handleUpdate = async (data) => {
     await updateTeam(modal.id, data);
-    load();
+    invalidate();
   };
 
   const handleDelete = async (team, e) => {
@@ -91,7 +88,7 @@ export default function Teams() {
     e.stopPropagation();
     if (!confirm(`Delete "${team.name}"? This will also delete all games and stats for this team.`)) return;
     await deleteTeam(team.id);
-    load();
+    invalidate();
   };
 
   return (

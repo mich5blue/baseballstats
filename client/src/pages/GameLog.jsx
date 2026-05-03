@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getGames, getTeams, createGame } from '../api/client.js';
 import SortableTable from '../components/SortableTable.jsx';
 import GameForm from '../components/GameForm.jsx';
@@ -18,29 +19,20 @@ function getResult(game) {
 
 export default function GameLog() {
   const navigate = useNavigate();
-  const [games, setGames] = useState([]);
-  const [teams, setTeams] = useState([]);
+  const queryClient = useQueryClient();
   const [teamFilter, setTeamFilter] = useState('');
-  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
-  const load = (tid) => {
-    setLoading(true);
-    Promise.all([
-      getGames(tid || undefined),
-      getTeams()
-    ]).then(([g, t]) => {
-      setGames(g);
-      setTeams(t);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  };
-
-  useEffect(() => { load(teamFilter); }, [teamFilter]);
+  const { data: games = [], isLoading: gamesLoading } = useQuery({
+    queryKey: ['games', teamFilter || null],
+    queryFn: () => getGames(teamFilter || undefined),
+  });
+  const { data: teams = [], isLoading: teamsLoading } = useQuery({ queryKey: ['teams'], queryFn: getTeams });
+  const loading = gamesLoading || teamsLoading;
 
   const handleCreate = async (data) => {
     await createGame(data);
-    load(teamFilter);
+    queryClient.invalidateQueries({ queryKey: ['games'] });
     setShowModal(false);
   };
 

@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { getTeams, getTeamStats, getGames } from '../api/client.js';
 import SortableTable from '../components/SortableTable.jsx';
 
@@ -125,34 +126,24 @@ function TotalsRow({ data, columns }) {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function TeamStats() {
-  const [teams, setTeams]   = useState([]);
   const [teamId, setTeamId] = useState(null);
-  const [stats, setStats]   = useState({ batting: [], pitching: [] });
-  const [games, setGames]   = useState([]);
-  const [loading, setLoading] = useState(true);
   const [tab, setTab]       = useState('batting');
 
-  // Load teams on mount
-  useEffect(() => {
-    getTeams().then(ts => {
-      setTeams(ts);
-      if (ts.length) setTeamId(ts[0].id);
-    });
-  }, []);
+  const { data: teams = [] } = useQuery({ queryKey: ['teams'], queryFn: getTeams });
 
-  // Load stats + games when team changes
-  useEffect(() => {
-    if (!teamId) return;
-    setLoading(true);
-    Promise.all([
-      getTeamStats(teamId),
-      getGames(teamId),
-    ]).then(([s, g]) => {
-      setStats(s);
-      setGames(g);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, [teamId]);
+  const resolvedTeamId = teamId ?? teams[0]?.id ?? null;
+
+  const { data: stats = { batting: [], pitching: [] }, isLoading: statsLoading } = useQuery({
+    queryKey: ['team', resolvedTeamId, 'stats'],
+    queryFn: () => getTeamStats(resolvedTeamId),
+    enabled: !!resolvedTeamId,
+  });
+  const { data: games = [], isLoading: gamesLoading } = useQuery({
+    queryKey: ['games', resolvedTeamId],
+    queryFn: () => getGames(resolvedTeamId),
+    enabled: !!resolvedTeamId,
+  });
+  const loading = statsLoading || gamesLoading;
 
   // ── Derived numbers ─────────────────────────────────────────────────────────
   const record = useMemo(() => {
@@ -167,7 +158,7 @@ export default function TeamStats() {
 
   const teamBat  = useMemo(() => calcTeamBatting(stats.batting), [stats.batting]);
   const teamPitch = useMemo(() => calcTeamPitching(stats.pitching), [stats.pitching]);
-  const currentTeam = teams.find(t => t.id === teamId);
+  const currentTeam = teams.find(t => t.id === resolvedTeamId);
 
   // ── Batting columns ─────────────────────────────────────────────────────────
   const battingCols = useMemo(() => [
@@ -288,7 +279,7 @@ export default function TeamStats() {
         </div>
         {teams.length > 1 && (
           <select
-            value={teamId || ''}
+            value={resolvedTeamId || ''}
             onChange={e => setTeamId(Number(e.target.value))}
             className="select-field text-sm"
           >

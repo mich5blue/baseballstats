@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPlayers, createPlayer, deletePlayer, getTeams, addPlayerToTeam } from '../api/client.js';
 
 const POSITIONS = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'OF', 'EH', 'DH'];
@@ -85,39 +86,31 @@ function AddPlayerModal({ onClose, onSuccess, teamId }) {
 }
 
 export default function Roster() {
-  const [players, setPlayers] = useState([]);
-  const [filtered, setFiltered] = useState([]);
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [teamId, setTeamId] = useState(null);
 
-  const load = () => {
-    setLoading(true);
-    Promise.all([getPlayers(), getTeams()]).then(([pls, teams]) => {
-      setPlayers(pls);
-      setFiltered(pls);
-      if (teams.length > 0) setTeamId(teams[0].id);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  };
+  const { data: players = [], isLoading: playersLoading } = useQuery({ queryKey: ['players'], queryFn: getPlayers });
+  const { data: teams = [], isLoading: teamsLoading } = useQuery({ queryKey: ['teams'], queryFn: getTeams });
+  const loading = playersLoading || teamsLoading;
+  const teamId = teams[0]?.id ?? null;
 
-  useEffect(() => { load(); }, []);
-
-  useEffect(() => {
+  const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    setFiltered(players.filter(p =>
+    return players.filter(p =>
       p.name.toLowerCase().includes(q) ||
       (p.nickname || '').toLowerCase().includes(q) ||
       (p.position || '').toLowerCase().includes(q)
-    ));
+    );
   }, [search, players]);
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['players'] });
 
   const handleDelete = async (player, e) => {
     e.preventDefault();
     if (!confirm(`Remove ${player.name} from roster? This deletes all their stats.`)) return;
     await deletePlayer(player.id);
-    load();
+    invalidate();
   };
 
   const positionColor = (pos) => {
@@ -205,7 +198,7 @@ export default function Roster() {
         <AddPlayerModal
           teamId={teamId}
           onClose={() => setShowModal(false)}
-          onSuccess={load}
+          onSuccess={invalidate}
         />
       )}
     </div>

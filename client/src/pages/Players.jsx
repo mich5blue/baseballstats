@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPlayers, createPlayer, deletePlayer } from '../api/client.js';
 
 function PlayerModal({ onSubmit, onClose }) {
@@ -85,43 +86,34 @@ function PlayerModal({ onSubmit, onClose }) {
 }
 
 export default function Players() {
-  const [players, setPlayers] = useState([]);
-  const [filtered, setFiltered] = useState([]);
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
-  const load = () => {
-    setLoading(true);
-    getPlayers().then(data => {
-      setPlayers(data);
-      setFiltered(data);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  };
+  const { data: players = [], isLoading: loading } = useQuery({ queryKey: ['players'], queryFn: getPlayers });
 
-  useEffect(() => { load(); }, []);
-
-  useEffect(() => {
+  const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    setFiltered(players.filter(p =>
+    return players.filter(p =>
       p.name.toLowerCase().includes(q) ||
       (p.nickname || '').toLowerCase().includes(q) ||
       (p.position || '').toLowerCase().includes(q) ||
       p.teams.some(t => t.name.toLowerCase().includes(q))
-    ));
+    );
   }, [search, players]);
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['players'] });
 
   const handleCreate = async (data) => {
     await createPlayer(data);
-    load();
+    invalidate();
   };
 
   const handleDelete = async (player, e) => {
     e.preventDefault();
     if (!confirm(`Delete "${player.name}"? This will also delete all their stats.`)) return;
     await deletePlayer(player.id);
-    load();
+    invalidate();
   };
 
   return (
