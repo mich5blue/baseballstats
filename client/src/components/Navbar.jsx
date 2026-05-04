@@ -27,11 +27,6 @@ export default function Navbar({ rootMode = false }) {
 
           {/* Logo / team name */}
           <div className="flex items-center gap-3">
-            {slug && (
-              <Link to="/" className="text-muted hover:text-white text-sm mr-1 hidden sm:block transition-colors" title="All Teams">
-                ←
-              </Link>
-            )}
             <Link to={slug ? `/${slug}/dashboard` : '/'} className="flex items-center gap-3 group">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm text-white"
                 style={{ backgroundColor: teamColor }}>
@@ -92,12 +87,6 @@ export default function Navbar({ rootMode = false }) {
         {/* Mobile nav */}
         {mobileOpen && (
           <div className="md:hidden pb-4 flex flex-col gap-1">
-            {slug && (
-              <Link to="/" onClick={() => setMobileOpen(false)}
-                className="px-4 py-2.5 rounded-lg text-sm font-medium text-muted hover:text-white hover:bg-surface transition-all">
-                ← All Teams
-              </Link>
-            )}
             {navLinks.map(link => (
               <NavLink key={link.to} to={link.to} onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
