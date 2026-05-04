@@ -157,6 +157,16 @@ export default function TeamStats() {
   const teamBat  = useMemo(() => calcTeamBatting(stats.batting), [stats.batting]);
   const teamPitch = useMemo(() => calcTeamPitching(stats.pitching), [stats.pitching]);
 
+  // Enrich batting rows with derived counting stats for leader cards
+  const battingEnriched = useMemo(() => stats.batting.map(p => ({
+    ...p,
+    xbh: (Number(p.doubles) || 0) + (Number(p.triples) || 0) + (Number(p.home_runs) || 0),
+    tb:  (Number(p.singles) || 0)
+       + (Number(p.doubles) || 0) * 2
+       + (Number(p.triples) || 0) * 3
+       + (Number(p.home_runs) || 0) * 4,
+  })), [stats.batting]);
+
   // ── Batting columns ─────────────────────────────────────────────────────────
   const battingCols = useMemo(() => [
     { header: 'Player', accessorKey: 'player_name', defaultSort: false,
@@ -305,11 +315,14 @@ export default function TeamStats() {
 
           {/* ── Stat leaders ────────────────────────────────────────────────── */}
           {(stats.batting.length > 0 || stats.pitching.length > 0) && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-              <LeaderCard tp={tp} label="Batting Avg"  emoji="🎯" players={stats.batting}  statKey="avg"            statLabel="AVG" />
-              <LeaderCard tp={tp} label="On-Base %"    emoji="👟" players={stats.batting}  statKey="obp"            statLabel="OBP" />
-              <LeaderCard tp={tp} label="RBI"          emoji="💥" players={stats.batting}  statKey="rbi"            statLabel="Run Batted In" />
-              <LeaderCard tp={tp} label="Stolen Bases" emoji="💨" players={stats.batting}  statKey="stolen_bases"   statLabel="SB" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 mb-6">
+              <LeaderCard tp={tp} label="Batting Avg"  emoji="🎯" players={battingEnriched} statKey="avg"            statLabel="AVG" />
+              <LeaderCard tp={tp} label="On-Base %"    emoji="👟" players={battingEnriched} statKey="obp"            statLabel="OBP" />
+              <LeaderCard tp={tp} label="RBI"          emoji="💥" players={battingEnriched} statKey="rbi"            statLabel="Run Batted In" />
+              <LeaderCard tp={tp} label="Walks"        emoji="🚶" players={battingEnriched} statKey="walks"          statLabel="BB" />
+              <LeaderCard tp={tp} label="Extra Base H" emoji="💪" players={battingEnriched} statKey="xbh"            statLabel="XBH (2B+3B+HR)" />
+              <LeaderCard tp={tp} label="Total Bases"  emoji="⚾" players={battingEnriched} statKey="tb"             statLabel="TB" />
+              <LeaderCard tp={tp} label="Stolen Bases" emoji="💨" players={battingEnriched} statKey="stolen_bases"   statLabel="SB" />
               {stats.pitching.length > 0 && <>
                 <LeaderCard tp={tp} label="ERA"          emoji="🔥" players={stats.pitching} statKey="era"            statLabel="Earned Run Avg" higherBetter={false} format={v => parseFloat(v).toFixed(2)} />
                 <LeaderCard tp={tp} label="Strikeouts"   emoji="⚡" players={stats.pitching} statKey="strikeouts"     statLabel="K" />
