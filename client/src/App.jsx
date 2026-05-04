@@ -1,8 +1,10 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { TeamProvider } from './context/TeamContext.jsx';
+import { useTeam } from './context/TeamContext.jsx';
 import PinGate from './components/PinGate.jsx';
 import Navbar from './components/Navbar.jsx';
+import LoadingScreen from './components/LoadingScreen.jsx';
 import Home from './pages/Home.jsx';
 import Manage from './pages/Manage.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -14,6 +16,15 @@ import TeamStats from './pages/TeamStats.jsx';
 import Import from './pages/Import.jsx';
 
 function TeamLayout() {
+  const { isLoading, slug } = useTeam();
+
+  if (isLoading) {
+    const label = slug
+      ? slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+      : 'Loading…';
+    return <LoadingScreen label={label} />;
+  }
+
   return (
     <div className="min-h-screen bg-field text-white">
       <Navbar />

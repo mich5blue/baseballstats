@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Dark navy rounded square background -->
+  <rect width="32" height="32" rx="7" fill="#0a1628"/>
+
+  <!-- Baseball — off-white circle -->
+  <circle cx="16" cy="16" r="10" fill="#f0ebe0" stroke="#d4ccb8" stroke-width="0.5"/>
+
+  <!-- Left seam arc (red curved line) -->
+  <path d="M 9.5 11 C 11 13.5 11 18.5 9.5 21" fill="none" stroke="#cc2222" stroke-width="1.3" stroke-linecap="round"/>
+  <!-- Right seam arc -->
+  <path d="M 22.5 11 C 21 13.5 21 18.5 22.5 21" fill="none" stroke="#cc2222" stroke-width="1.3" stroke-linecap="round"/>
+
+  <!-- Left seam stitches (perpendicular tick marks) -->
+  <line x1="9.1" y1="12.8" x2="11.2" y2="13.4" stroke="#cc2222" stroke-width="0.85" stroke-linecap="round"/>
+  <line x1="8.7" y1="15.0" x2="11.0" y2="15.0" stroke="#cc2222" stroke-width="0.85" stroke-linecap="round"/>
+  <line x1="9.0" y1="17.2" x2="11.1" y2="16.6" stroke="#cc2222" stroke-width="0.85" stroke-linecap="round"/>
+  <line x1="9.7" y1="19.2" x2="11.5" y2="18.2" stroke="#cc2222" stroke-width="0.85" stroke-linecap="round"/>
+
+  <!-- Right seam stitches -->
+  <line x1="22.9" y1="12.8" x2="20.8" y2="13.4" stroke="#cc2222" stroke-width="0.85" stroke-linecap="round"/>
+  <line x1="23.3" y1="15.0" x2="21.0" y2="15.0" stroke="#cc2222" stroke-width="0.85" stroke-linecap="round"/>
+  <line x1="23.0" y1="17.2" x2="20.9" y2="16.6" stroke="#cc2222" stroke-width="0.85" stroke-linecap="round"/>
+  <line x1="22.3" y1="19.2" x2="20.5" y2="18.2" stroke="#cc2222" stroke-width="0.85" stroke-linecap="round"/>
+</svg>

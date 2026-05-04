@@ -118,3 +118,36 @@
   background-color: rgba(201, 165, 53, 0.08);
   cursor: pointer;
 }
+
+/* Baseball loading screen */
+@keyframes baseball-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes base-pulse {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50%       { opacity: 1;    transform: scale(1.15); }
+}
+
+@keyframes loader-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes dot-bounce {
+  0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
+  40%           { opacity: 1;   transform: translateY(-4px); }
+}
+
+.baseball-spin  { animation: baseball-spin  1.4s linear infinite; }
+.loader-fade-in { animation: loader-fade-in 0.4s ease-out both; }
+
+.base-1 { animation: base-pulse 1.6s ease-in-out infinite 0.0s; }
+.base-2 { animation: base-pulse 1.6s ease-in-out infinite 0.4s; }
+.base-3 { animation: base-pulse 1.6s ease-in-out infinite 0.8s; }
+.base-4 { animation: base-pulse 1.6s ease-in-out infinite 1.2s; }
+
+.dot-1 { animation: dot-bounce 1.2s ease-in-out infinite 0.0s; }
+.dot-2 { animation: dot-bounce 1.2s ease-in-out infinite 0.2s; }
+.dot-3 { animation: dot-bounce 1.2s ease-in-out infinite 0.4s; }
