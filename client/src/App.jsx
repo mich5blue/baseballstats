@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { TeamProvider } from './context/TeamContext.jsx';
 import { useTeam } from './context/TeamContext.jsx';
@@ -16,7 +16,16 @@ import TeamStats from './pages/TeamStats.jsx';
 import Import from './pages/Import.jsx';
 
 function TeamLayout() {
-  const { isLoading, slug } = useTeam();
+  const { isLoading, slug, team } = useTeam();
+
+  useEffect(() => {
+    if (team?.name) {
+      document.title = team.name;
+    } else {
+      document.title = 'Baseball Statistics';
+    }
+    return () => { document.title = 'Baseball Statistics'; };
+  }, [team?.name]);
 
   if (isLoading) {
     const label = slug
