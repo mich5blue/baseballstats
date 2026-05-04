@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getTeams } from '../api/client.js';
+import LoadingScreen from '../components/LoadingScreen.jsx';
 
 function WinLossBadge({ wins, losses }) {
   return (
@@ -16,11 +17,7 @@ function WinLossBadge({ wins, losses }) {
 export default function Home() {
   const { data: teams = [], isLoading } = useQuery({ queryKey: ['teams'], queryFn: getTeams });
 
-  if (isLoading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+  if (isLoading) return <LoadingScreen />;
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

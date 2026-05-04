@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTeam, useTeamPath } from '../context/TeamContext.jsx';
 import { getFeaturedStats, getGames, getTeamStats } from '../api/client.js';
 import { IcoBaseball, IcoPitcher, IcoStar } from '../components/Icons.jsx';
+import LoadingScreen from '../components/LoadingScreen.jsx';
 
 function formatDate(d) {
   if (!d) return '—';
@@ -98,11 +99,7 @@ export default function Dashboard() {
   const losses = games.filter(g => getResult(g) === 'L').length;
   const recentGames = games.slice(0, 5);
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <LoadingScreen />;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">

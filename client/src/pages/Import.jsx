@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import BaseballSpinner from '../components/BaseballSpinner.jsx';
 import { useNavigate } from 'react-router-dom';
 import { useTeamPath } from '../context/TeamContext.jsx';
 import { importImage, commitBoxscore, importExcel, importScorebookAnalyze, applyHitZones } from '../api/client.js';
@@ -33,7 +34,7 @@ function DropZone({ accept, label, icon, onFile, loading }) {
       <div className="mb-4 flex items-center justify-center text-muted">{icon}</div>
       {loading ? (
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          <BaseballSpinner size="sm" />
           <p className="text-muted text-sm">Analyzing image with AI…</p>
         </div>
       ) : (

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import BaseballSpinner from '../components/BaseballSpinner.jsx';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTeam, useTeamPath } from '../context/TeamContext.jsx';
@@ -119,7 +120,7 @@ export default function GameLog() {
 
       {loading ? (
         <div className="flex items-center justify-center h-48">
-          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          <BaseballSpinner size="md" />
         </div>
       ) : (
         <SortableTable

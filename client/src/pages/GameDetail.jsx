@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTeamPath } from '../context/TeamContext.jsx';
 import { IcoBat, IcoBaseball, IcoPencil, IcoTrash } from '../components/Icons.jsx';
+import BaseballSpinner from '../components/BaseballSpinner.jsx';
 import {
   getGame, updateGame, getAtBats, createAtBat, updateAtBat, deleteAtBat,
   getPitching, createPitching, updatePitching, deletePitching
@@ -158,7 +159,7 @@ export default function GameDetail() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
-      <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+      <BaseballSpinner size="md" />
     </div>
   );
 
