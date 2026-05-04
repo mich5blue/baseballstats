@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { importExcel, importImage } from '../api/client.js';
+import { IcoBarChart, IcoCamera } from './Icons.jsx';
 
 export default function ImportUpload({ type = 'excel', onSuccess }) {
   const [dragging, setDragging] = useState(false);
@@ -58,7 +59,9 @@ export default function ImportUpload({ type = 'excel', onSuccess }) {
         </div>
       ) : (
         <>
-          <div className="text-5xl mb-4">{type === 'excel' ? '📊' : '📸'}</div>
+          <div className="mb-4 flex items-center justify-center text-muted">
+            {type === 'excel' ? <IcoBarChart className="w-14 h-14" /> : <IcoCamera className="w-14 h-14" />}
+          </div>
           <p className="text-white font-semibold mb-1">
             {type === 'excel' ? 'Drop your Excel/CSV file here' : 'Drop your screenshot here'}
           </p>

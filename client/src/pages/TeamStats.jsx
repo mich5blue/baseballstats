@@ -4,6 +4,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useTeam, useTeamPath } from '../context/TeamContext.jsx';
 import { getTeamStats, getGames } from '../api/client.js';
 import SortableTable from '../components/SortableTable.jsx';
+import {
+  IcoBaseball, IcoDiamond, IcoHomePlate, IcoRunner, IcoFourBalls,
+  IcoBatContact, IcoBases, IcoSteal, IcoFlame, IcoStrikeout, IcoPitcher,
+} from '../components/Icons.jsx';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -46,7 +50,7 @@ function statFmt(val, decimals = 3) {
   return n.toFixed(decimals);
 }
 
-function LeaderCard({ label, emoji, players, statKey, statLabel, format, higherBetter = true, link = true, tp = x => x }) {
+function LeaderCard({ label, icon: Icon, players, statKey, statLabel, format, higherBetter = true, link = true, tp = x => x }) {
   const sorted = [...players]
     .filter(p => p[statKey] !== null && p[statKey] !== undefined && p[statKey] !== '---')
     .sort((a, b) => higherBetter
@@ -60,7 +64,7 @@ function LeaderCard({ label, emoji, players, statKey, statLabel, format, higherB
   return (
     <div className="card p-4">
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-xl">{emoji}</span>
+        {Icon && <Icon className="w-4 h-4 text-accent flex-shrink-0" />}
         <span className="text-xs font-bold tracking-widest uppercase text-muted">{label}</span>
       </div>
       <div className="space-y-2">
@@ -320,19 +324,19 @@ export default function TeamStats() {
           {/* ── Stat leaders ────────────────────────────────────────────────── */}
           {(stats.batting.length > 0 || stats.pitching.length > 0) && (
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3 mb-6">
-              <LeaderCard tp={tp} label="AVG"   emoji="🎯" players={battingEnriched} statKey="avg"          statLabel="Batting Average" />
-              <LeaderCard tp={tp} label="OBP"   emoji="👟" players={battingEnriched} statKey="obp"          statLabel="On-Base %" />
-              <LeaderCard tp={tp} label="RBI"   emoji="💥" players={battingEnriched} statKey="rbi"          statLabel="Runs Batted In" />
-              <LeaderCard tp={tp} label="R"     emoji="🏃" players={battingEnriched} statKey="runs"         statLabel="Runs Scored" />
-              <LeaderCard tp={tp} label="BB"    emoji="🚶" players={battingEnriched} statKey="walks"        statLabel="Walks" />
-              <LeaderCard tp={tp} label="XBH"   emoji="💪" players={battingEnriched} statKey="xbh"          statLabel="Extra Base Hits" />
-              <LeaderCard tp={tp} label="TB"    emoji="⚾" players={battingEnriched} statKey="tb"           statLabel="Total Bases" />
+              <LeaderCard tp={tp} label="AVG"   icon={IcoBaseball}   players={battingEnriched} statKey="avg"          statLabel="Batting Average" />
+              <LeaderCard tp={tp} label="OBP"   icon={IcoDiamond}    players={battingEnriched} statKey="obp"          statLabel="On-Base %" />
+              <LeaderCard tp={tp} label="RBI"   icon={IcoHomePlate}  players={battingEnriched} statKey="rbi"          statLabel="Runs Batted In" />
+              <LeaderCard tp={tp} label="R"     icon={IcoRunner}     players={battingEnriched} statKey="runs"         statLabel="Runs Scored" />
+              <LeaderCard tp={tp} label="BB"    icon={IcoFourBalls}  players={battingEnriched} statKey="walks"        statLabel="Walks" />
+              <LeaderCard tp={tp} label="XBH"   icon={IcoBatContact} players={battingEnriched} statKey="xbh"          statLabel="Extra Base Hits" />
+              <LeaderCard tp={tp} label="TB"    icon={IcoBases}      players={battingEnriched} statKey="tb"           statLabel="Total Bases" />
               {hasStolenBases && (
-                <LeaderCard tp={tp} label="SB"  emoji="💨" players={battingEnriched} statKey="stolen_bases" statLabel="Stolen Bases" />
+                <LeaderCard tp={tp} label="SB"  icon={IcoSteal}      players={battingEnriched} statKey="stolen_bases" statLabel="Stolen Bases" />
               )}
               {stats.pitching.length > 0 && <>
-                <LeaderCard tp={tp} label="ERA" emoji="🔥" players={stats.pitching}  statKey="era"          statLabel="Earned Run Avg" higherBetter={false} format={v => parseFloat(v).toFixed(2)} />
-                <LeaderCard tp={tp} label="K"   emoji="⚡" players={stats.pitching}  statKey="strikeouts"   statLabel="Strikeouts" />
+                <LeaderCard tp={tp} label="ERA" icon={IcoFlame}      players={stats.pitching}  statKey="era"          statLabel="Earned Run Avg" higherBetter={false} format={v => parseFloat(v).toFixed(2)} />
+                <LeaderCard tp={tp} label="K"   icon={IcoStrikeout}  players={stats.pitching}  statKey="strikeouts"   statLabel="Strikeouts" />
               </>}
             </div>
           )}
@@ -342,7 +346,10 @@ export default function TeamStats() {
             {['batting', 'pitching'].map(t => (
               <button key={t} onClick={() => setTab(t)}
                 className={`pb-3 text-sm font-medium capitalize ${tab === t ? 'tab-active' : 'tab-inactive'}`}>
-                {t === 'batting' ? '⚾ Batting' : '💪 Pitching'}
+                {t === 'batting'
+                  ? <span className="flex items-center gap-1.5"><IcoBaseball className="w-4 h-4" /> Batting</span>
+                  : <span className="flex items-center gap-1.5"><IcoPitcher className="w-4 h-4" /> Pitching</span>
+                }
               </button>
             ))}
           </div>

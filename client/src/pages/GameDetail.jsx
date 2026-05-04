@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTeamPath } from '../context/TeamContext.jsx';
+import { IcoBat, IcoBaseball, IcoPencil, IcoTrash } from '../components/Icons.jsx';
 import {
   getGame, updateGame, getAtBats, createAtBat, updateAtBat, deleteAtBat,
   getPitching, createPitching, updatePitching, deletePitching
@@ -73,18 +74,18 @@ export default function GameDetail() {
       cell: i => (
         <div className="flex gap-1">
           <button
-            className="text-muted hover:text-white p-1 text-sm transition-colors"
+            className="text-muted hover:text-white p-1 transition-colors"
             onClick={e => { e.stopPropagation(); setAtBatModal(i.row.original); }}
-          >✏️</button>
+          ><IcoPencil className="w-3.5 h-3.5" /></button>
           <button
-            className="text-muted hover:text-red-400 p-1 text-sm transition-colors"
+            className="text-muted hover:text-red-400 p-1 transition-colors"
             onClick={async e => {
               e.stopPropagation();
               if (!confirm('Delete this at-bat record?')) return;
               await deleteAtBat(i.row.original.id);
               invalidate();
             }}
-          >🗑️</button>
+          ><IcoTrash className="w-3.5 h-3.5" /></button>
         </div>
       )
     }
@@ -138,18 +139,18 @@ export default function GameDetail() {
       cell: i => (
         <div className="flex gap-1">
           <button
-            className="text-muted hover:text-white p-1 text-sm transition-colors"
+            className="text-muted hover:text-white p-1 transition-colors"
             onClick={e => { e.stopPropagation(); setPitchingModal(i.row.original); }}
-          >✏️</button>
+          ><IcoPencil className="w-3.5 h-3.5" /></button>
           <button
-            className="text-muted hover:text-red-400 p-1 text-sm transition-colors"
+            className="text-muted hover:text-red-400 p-1 transition-colors"
             onClick={async e => {
               e.stopPropagation();
               if (!confirm('Delete this pitching record?')) return;
               await deletePitching(i.row.original.id);
               invalidate();
             }}
-          >🗑️</button>
+          ><IcoTrash className="w-3.5 h-3.5" /></button>
         </div>
       )
     }
@@ -213,10 +214,10 @@ export default function GameDetail() {
               {game.notes && <p className="text-muted text-sm mt-2 italic">"{game.notes}"</p>}
             </div>
             <button
-              className="btn-secondary text-sm"
+              className="btn-secondary text-sm flex items-center gap-1.5"
               onClick={() => setEditGame(true)}
             >
-              ✏️ Edit Game
+              <IcoPencil className="w-3.5 h-3.5" /> Edit Game
             </button>
           </div>
         </div>
@@ -226,7 +227,7 @@ export default function GameDetail() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span className="text-accent">🏏</span> Batting
+            <IcoBat className="w-5 h-5 text-accent" /> Batting
             <span className="text-muted text-sm font-normal">({atBats.length} player{atBats.length !== 1 ? 's' : ''})</span>
           </h2>
           <button className="btn-primary" onClick={() => setAtBatModal('add')}>+ Add At-Bat</button>
@@ -263,7 +264,7 @@ export default function GameDetail() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span className="text-gold">⚾</span> Pitching
+            <IcoBaseball className="w-5 h-5 text-gold" /> Pitching
             <span className="text-muted text-sm font-normal">({pitching.length} pitcher{pitching.length !== 1 ? 's' : ''})</span>
           </h2>
           <button className="btn-primary" onClick={() => setPitchingModal('add')}>+ Add Pitching</button>

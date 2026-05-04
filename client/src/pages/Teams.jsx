@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getTeams, createTeam, updateTeam, deleteTeam } from '../api/client.js';
+import { IcoStadium, IcoPencil, IcoTrash } from '../components/Icons.jsx';
 
 function TeamModal({ initial, onSubmit, onClose }) {
   const [form, setForm] = useState({
@@ -107,7 +108,7 @@ export default function Teams() {
         </div>
       ) : teams.length === 0 ? (
         <div className="card p-12 text-center">
-          <div className="text-6xl mb-4">🏟️</div>
+          <div className="flex justify-center mb-4 text-muted"><IcoStadium className="w-16 h-16" /></div>
           <p className="text-white font-semibold text-lg mb-2">No teams yet</p>
           <p className="text-muted mb-6">Create your first team to get started tracking stats.</p>
           <button className="btn-primary" onClick={() => setModal('add')}>Create First Team</button>
@@ -146,14 +147,14 @@ export default function Teams() {
                     onClick={e => { e.preventDefault(); e.stopPropagation(); setModal(team); }}
                     title="Edit"
                   >
-                    ✏️
+                    <IcoPencil className="w-4 h-4" />
                   </button>
                   <button
                     className="p-1.5 text-muted hover:text-red-400 rounded transition-colors"
                     onClick={e => handleDelete(team, e)}
                     title="Delete"
                   >
-                    🗑️
+                    <IcoTrash className="w-4 h-4" />
                   </button>
                 </div>
               </div>

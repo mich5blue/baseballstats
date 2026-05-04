@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useTeam } from '../context/TeamContext.jsx';
+import { IcoBaseball } from './Icons.jsx';
 
 export default function Navbar({ rootMode = false }) {
   const teamCtx = useTeam();
@@ -34,7 +35,7 @@ export default function Navbar({ rootMode = false }) {
             <Link to={slug ? `/${slug}/dashboard` : '/'} className="flex items-center gap-3 group">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm text-white"
                 style={{ backgroundColor: teamColor }}>
-                {team ? team.name.charAt(0).toUpperCase() : '⚾'}
+                {team ? team.name.charAt(0).toUpperCase() : <IcoBaseball className="w-4 h-4" />}
               </div>
               <div className="flex flex-col leading-none">
                 <span className="font-black text-base tracking-tight text-white">
@@ -71,16 +72,6 @@ export default function Navbar({ rootMode = false }) {
                 )}
               </NavLink>
             ))}
-            {slug && (
-              <Link to={`/${slug}/admin`}
-                className="ml-2 px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-white hover:bg-surface transition-all">
-                Import
-              </Link>
-            )}
-            <Link to="/manage"
-              className="ml-1 px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-white hover:bg-surface transition-all">
-              ⚙
-            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -117,16 +108,6 @@ export default function Navbar({ rootMode = false }) {
                 {link.label}
               </NavLink>
             ))}
-            {slug && (
-              <Link to={`/${slug}/admin`} onClick={() => setMobileOpen(false)}
-                className="px-4 py-2.5 rounded-lg text-sm font-medium text-muted hover:text-white hover:bg-surface transition-all">
-                Import
-              </Link>
-            )}
-            <Link to="/manage" onClick={() => setMobileOpen(false)}
-              className="px-4 py-2.5 rounded-lg text-sm font-medium text-muted hover:text-white hover:bg-surface transition-all">
-              ⚙ Manage Teams
-            </Link>
           </div>
         )}
       </div>

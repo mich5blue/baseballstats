@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTeamPath } from '../context/TeamContext.jsx';
 import { getPlayerStats, updatePlayer } from '../api/client.js';
+import { IcoStar } from '../components/Icons.jsx';
 import SortableTable from '../components/SortableTable.jsx';
 import SprayChart from '../components/SprayChart.jsx';
 import SprayChartEditor from '../components/SprayChartEditor.jsx';
@@ -292,7 +293,7 @@ export default function PlayerProfile() {
               <div>
                 <div className="flex items-center gap-2 mb-0.5">
                   <h1 className="text-4xl font-black text-white">{player.name}</h1>
-                  {player.is_featured === 1 && <span className="text-gold text-2xl">⭐</span>}
+                  {player.is_featured === 1 && <IcoStar filled className="w-6 h-6 text-gold" />}
                 </div>
                 {player.nickname && <p className="text-muted text-lg">"{player.nickname}"</p>}
                 <div className="flex items-center gap-3 mt-1.5 flex-wrap text-sm">
@@ -332,7 +333,10 @@ export default function PlayerProfile() {
                 player.is_featured ? 'bg-gold/20 text-gold border border-gold/30 hover:bg-gold/30' : 'btn-secondary'
               }`}
             >
-              {player.is_featured ? '★ Featured' : '☆ Set Featured'}
+              {player.is_featured
+                ? <><IcoStar filled className="w-4 h-4" /> Featured</>
+                : <><IcoStar className="w-4 h-4" /> Set Featured</>
+              }
             </button>
           </div>
 

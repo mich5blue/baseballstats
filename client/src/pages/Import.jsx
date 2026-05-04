@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTeamPath } from '../context/TeamContext.jsx';
 import { importImage, commitBoxscore, importExcel, importScorebookAnalyze, applyHitZones } from '../api/client.js';
+import { IcoCelebrate, IcoBookOpen, IcoBarChart, IcoCamera, IcoFileText, IcoSmartphone, IcoBaseball } from '../components/Icons.jsx';
 
 // ─── Drag-and-drop upload zone ────────────────────────────────────────────────
 function DropZone({ accept, label, icon, onFile, loading }) {
@@ -29,7 +30,7 @@ function DropZone({ accept, label, icon, onFile, loading }) {
         ${dragging ? 'border-accent bg-accent/10' : 'border-border hover:border-accent/50 hover:bg-surface/50'}
         ${loading ? 'opacity-50 pointer-events-none' : ''}`}
     >
-      <div className="text-5xl mb-3">{icon}</div>
+      <div className="mb-4 flex items-center justify-center text-muted">{icon}</div>
       {loading ? (
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
@@ -342,7 +343,7 @@ function ReviewScreen({ parsed, fileName, onCommit, onReset }) {
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               Importing…
             </span>
-          ) : '⚾ Import Everything'}
+          ) : <span className="flex items-center gap-2"><IcoBaseball className="w-5 h-5" /> Import Everything</span>}
         </button>
       </div>
     </div>
@@ -354,7 +355,7 @@ function SuccessScreen({ result, onReset, tp }) {
   const navigate = useNavigate();
   return (
     <div className="text-center py-12 space-y-6">
-      <div className="text-6xl">🎉</div>
+      <div className="flex justify-center text-accent"><IcoCelebrate className="w-16 h-16" /></div>
       <h2 className="text-3xl font-black text-white">Import Complete!</h2>
       <p className="text-muted text-lg">{result.message}</p>
       <div className="flex items-center justify-center gap-4 flex-wrap">
@@ -415,7 +416,7 @@ function ScorebookSection() {
   return (
     <div className="card p-6">
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-10 h-10 rounded-lg bg-blue-900/30 flex items-center justify-center text-xl">📓</div>
+        <div className="w-10 h-10 rounded-lg bg-blue-900/30 flex items-center justify-center"><IcoBookOpen className="w-5 h-5 text-blue-400" /></div>
         <div>
           <h2 className="text-xl font-bold text-white">Scorebook → Spray Chart</h2>
           <p className="text-muted text-sm">Upload a GameChanger scorebook PDF or photo — Claude reads the hit arrows and auto-populates spray chart zones</p>
@@ -426,7 +427,7 @@ function ScorebookSection() {
         <DropZone
           accept="image/*,.pdf"
           label="Drop your GameChanger scorebook here"
-          icon="📓"
+          icon={<IcoBookOpen className="w-14 h-14" />}
           onFile={handleFile}
           loading={loading}
         />
@@ -530,7 +531,7 @@ function ExcelSection() {
   return (
     <div className="card p-6">
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-10 h-10 rounded-lg bg-emerald-900/30 flex items-center justify-center text-xl">📊</div>
+        <div className="w-10 h-10 rounded-lg bg-emerald-900/30 flex items-center justify-center"><IcoBarChart className="w-5 h-5 text-emerald-400" /></div>
         <div>
           <h2 className="text-xl font-bold text-white">Excel / CSV Import</h2>
           <p className="text-muted text-sm">Upload a GameChanger export or any batting stats spreadsheet</p>
@@ -541,7 +542,7 @@ function ExcelSection() {
         <DropZone
           accept=".xlsx,.xls,.csv"
           label="Drop your Excel or CSV file here"
-          icon="📋"
+          icon={<IcoBarChart className="w-14 h-14" />}
           onFile={handleFile}
           loading={loading}
         />
@@ -639,7 +640,7 @@ export default function Import() {
       {/* ── Screenshot / Box Score Import ── */}
       <div className="card p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center text-xl">📸</div>
+          <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center"><IcoCamera className="w-5 h-5 text-accent" /></div>
           <div>
             <h2 className="text-xl font-bold text-white">Box Score Screenshot Import</h2>
             <p className="text-muted text-sm">GameChanger, photos, any box score — Claude reads it and creates everything for you</p>
@@ -650,12 +651,12 @@ export default function Import() {
           <div className="space-y-5">
             <div className="grid grid-cols-3 gap-3 mb-5">
               {[
-                { icon: '📄', text: 'GameChanger PDFs' },
-                { icon: '📷', text: 'Photos of score sheets' },
-                { icon: '📱', text: 'App screenshots' }
-              ].map(({ icon, text }) => (
-                <div key={text} className="bg-surface2 rounded-xl p-3 text-center border border-border">
-                  <div className="text-2xl mb-1">{icon}</div>
+                { icon: <IcoFileText className="w-7 h-7 text-muted" />, text: 'GameChanger PDFs' },
+                { icon: <IcoCamera className="w-7 h-7 text-muted" />, text: 'Photos of score sheets' },
+                { icon: <IcoSmartphone className="w-7 h-7 text-muted" />, text: 'App screenshots' }
+              ].map(({ icon, text }, idx) => (
+                <div key={idx} className="bg-surface2 rounded-xl p-3 text-center border border-border">
+                  <div className="flex items-center justify-center h-9 mb-1">{icon}</div>
                   <p className="text-muted text-xs">{text}</p>
                 </div>
               ))}
@@ -664,7 +665,7 @@ export default function Import() {
             <DropZone
               accept="image/*,.pdf"
               label="Drop a screenshot or GameChanger PDF here"
-              icon="⚾"
+              icon={<IcoBaseball className="w-14 h-14" />}
               onFile={handleImageFile}
               loading={loading}
             />

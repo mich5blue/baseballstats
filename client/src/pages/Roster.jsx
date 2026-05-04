@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTeam, useTeamPath } from '../context/TeamContext.jsx';
 import { getPlayers, createPlayer, updatePlayer, deletePlayer, addPlayerToTeam } from '../api/client.js';
+import { IcoSearch, IcoJersey, IcoTrash, IcoStar } from '../components/Icons.jsx';
 
 const POSITIONS = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'OF', 'EH', 'DH'];
 
@@ -160,7 +161,7 @@ export default function Roster() {
       </div>
 
       <div className="mb-5 relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">🔍</span>
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"><IcoSearch className="w-4 h-4" /></span>
         <input value={search} onChange={e => setSearch(e.target.value)}
           className="input-field pl-9" placeholder="Search by name or position..." />
       </div>
@@ -175,7 +176,7 @@ export default function Roster() {
             <p className="text-muted">No players match "{search}"</p>
           ) : (
             <>
-              <div className="text-5xl mb-4">👕</div>
+              <div className="flex justify-center mb-4 text-muted"><IcoJersey className="w-16 h-16" /></div>
               <p className="text-white font-semibold text-lg mb-2">Roster is empty</p>
               <p className="text-muted mb-5">Add players manually or import a box score.</p>
               <button className="btn-primary" onClick={() => setShowModal(true)}>Add First Player</button>
@@ -220,7 +221,7 @@ export default function Roster() {
                           >
                             {player.name}
                           </span>
-                          {player.is_featured === 1 && <span className="text-gold text-sm flex-shrink-0">⭐</span>}
+                          {player.is_featured === 1 && <IcoStar filled className="w-3.5 h-3.5 text-gold flex-shrink-0" />}
                         </>
                       )}
                     </div>
@@ -233,7 +234,7 @@ export default function Roster() {
                   </div>
                   <button className="p-1 text-muted hover:text-red-400 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
                     onClick={e => handleDelete(player, e)} title="Remove player">
-                    🗑️
+                    <IcoTrash className="w-4 h-4" />
                   </button>
                 </div>
               </Link>

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTeam, useTeamPath } from '../context/TeamContext.jsx';
 import { getFeaturedStats, getGames, getTeamStats } from '../api/client.js';
+import { IcoBaseball, IcoPitcher, IcoStar } from '../components/Icons.jsx';
 
 function formatDate(d) {
   if (!d) return '—';
@@ -144,7 +145,7 @@ export default function Dashboard() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-gold text-xs uppercase tracking-widest font-semibold">Featured Player</span>
-                  <span className="text-gold">★</span>
+                  <IcoStar filled className="w-4 h-4 text-gold" />
                 </div>
                 <h2 className="text-3xl font-black text-white">{featured.player.name}</h2>
                 {featured.player.nickname && <p className="text-muted">"{featured.player.nickname}"</p>}
@@ -258,7 +259,7 @@ export default function Dashboard() {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <span className="text-accent text-base">⚾</span> Batting Leaders
+                  <IcoBaseball className="w-4 h-4 text-accent" /> Batting Leaders
                 </h2>
                 <Link to={tp("/stats")} className="text-accent text-sm hover:underline">Full stats →</Link>
               </div>
@@ -296,7 +297,7 @@ export default function Dashboard() {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <span className="text-gold text-base">💪</span> Pitching Leaders
+                  <IcoPitcher className="w-4 h-4 text-gold" /> Pitching Leaders
                 </h2>
                 <Link to={tp("/stats")} className="text-gold text-sm hover:underline">Full stats →</Link>
               </div>

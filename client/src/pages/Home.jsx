@@ -76,11 +76,6 @@ export default function Home() {
         </div>
       )}
 
-      <div className="mt-8 text-center">
-        <Link to="/manage" className="text-muted text-sm hover:text-white transition-colors">
-          ⚙ Manage Teams
-        </Link>
-      </div>
     </div>
   );
 }

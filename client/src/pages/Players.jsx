@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPlayers, createPlayer, deletePlayer } from '../api/client.js';
+import { IcoSearch, IcoUser, IcoTrash, IcoStar } from '../components/Icons.jsx';
 
 function PlayerModal({ onSubmit, onClose }) {
   const [form, setForm] = useState({ name: '', nickname: '', position: '', bats: 'R', throws: 'R', is_featured: false, notes: '' });
@@ -69,7 +70,7 @@ function PlayerModal({ onSubmit, onClose }) {
           <label className="flex items-center gap-3 cursor-pointer bg-surface2 rounded-lg px-4 py-3">
             <input type="checkbox" name="is_featured" checked={form.is_featured} onChange={handleChange} className="w-4 h-4 accent-accent" />
             <div>
-              <div className="text-white text-sm font-medium">⭐ Featured Player</div>
+              <div className="text-white text-sm font-medium flex items-center gap-1.5"><IcoStar filled className="w-4 h-4 text-gold" /> Featured Player</div>
               <div className="text-muted text-xs">Show this player's stats on the dashboard</div>
             </div>
           </label>
@@ -129,7 +130,7 @@ export default function Players() {
       {/* Search */}
       <div className="mb-6">
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">🔍</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"><IcoSearch className="w-4 h-4" /></span>
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -145,7 +146,7 @@ export default function Players() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="card p-12 text-center">
-          <div className="text-6xl mb-4">👤</div>
+          <div className="flex justify-center mb-4 text-muted"><IcoUser className="w-16 h-16" /></div>
           {search ? (
             <p className="text-muted">No players match "{search}"</p>
           ) : (
@@ -170,7 +171,7 @@ export default function Players() {
                     <h3 className="font-bold text-white group-hover:text-accent transition-colors truncate">
                       {player.name}
                     </h3>
-                    {player.is_featured === 1 && <span className="text-gold text-sm">⭐</span>}
+                    {player.is_featured === 1 && <IcoStar filled className="w-3.5 h-3.5 text-gold flex-shrink-0" />}
                   </div>
                   {player.nickname && (
                     <p className="text-muted text-xs">"{player.nickname}"</p>
@@ -181,7 +182,7 @@ export default function Players() {
                   onClick={e => handleDelete(player, e)}
                   title="Delete player"
                 >
-                  🗑️
+                  <IcoTrash className="w-4 h-4" />
                 </button>
               </div>
 

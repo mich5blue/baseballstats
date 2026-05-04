@@ -8,6 +8,7 @@ import {
 } from '../api/client.js';
 import SortableTable from '../components/SortableTable.jsx';
 import GameForm from '../components/GameForm.jsx';
+import { IcoBat, IcoBaseball, IcoPencil, IcoTrash } from '../components/Icons.jsx';
 
 function getResult(game) {
   if (game.team_score === null || game.opponent_score === null) return '—';
@@ -216,12 +217,12 @@ export default function TeamDetail() {
     { header: '', id: 'actions',
       cell: i => (
         <div className="flex gap-1" onClick={e => e.stopPropagation()}>
-          <button className="p-1 text-muted hover:text-white" onClick={() => setGameModal(i.row.original)}>✏️</button>
+          <button className="p-1 text-muted hover:text-white" onClick={() => setGameModal(i.row.original)}><IcoPencil className="w-3.5 h-3.5" /></button>
           <button className="p-1 text-muted hover:text-red-400" onClick={async () => {
             if (!confirm('Delete this game?')) return;
             await deleteGame(i.row.original.id);
             invalidate();
-          }}>🗑️</button>
+          }}><IcoTrash className="w-3.5 h-3.5" /></button>
         </div>
       )
     }
@@ -338,7 +339,7 @@ export default function TeamDetail() {
         <div className="space-y-8">
           <div>
             <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
-              <span className="text-accent">🏏</span> Batting Stats
+              <IcoBat className="w-5 h-5 text-accent" /> Batting Stats
             </h3>
             <SortableTable
               columns={battingCols}
@@ -351,7 +352,7 @@ export default function TeamDetail() {
           {stats.pitching.length > 0 && (
             <div>
               <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
-                <span className="text-gold">⚾</span> Pitching Stats
+                <IcoBaseball className="w-5 h-5 text-gold" /> Pitching Stats
               </h3>
               <SortableTable
                 columns={pitchingCols}
