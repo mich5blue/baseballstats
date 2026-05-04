@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTeam, useTeamPath } from '../context/TeamContext.jsx';
-import { getPlayers, createPlayer, deletePlayer, addPlayerToTeam } from '../api/client.js';
+import { getPlayers, createPlayer, updatePlayer, deletePlayer, addPlayerToTeam } from '../api/client.js';
 
 const POSITIONS = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'OF', 'EH', 'DH'];
 
@@ -92,6 +92,9 @@ export default function Roster() {
   const tp = useTeamPath();
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState('');
+  const nameInputRef = useRef(null);
 
   const { data: players = [], isLoading: loading } = useQuery({
     queryKey: ['team', teamId, 'roster'],
@@ -109,6 +112,27 @@ export default function Roster() {
   }, [search, players]);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['players'] });
+
+  const startEdit = (player, e) => {
+    e.preventDefault();
+    setEditingId(player.id);
+    setEditName(player.name);
+    setTimeout(() => nameInputRef.current?.select(), 0);
+  };
+
+  const commitEdit = async (player) => {
+    const trimmed = editName.trim();
+    if (trimmed && trimmed !== player.name) {
+      await updatePlayer(player.id, { name: trimmed });
+      invalidate();
+    }
+    setEditingId(null);
+  };
+
+  const handleNameKey = (e, player) => {
+    if (e.key === 'Enter') { e.preventDefault(); commitEdit(player); }
+    if (e.key === 'Escape') { setEditingId(null); }
+  };
 
   const handleDelete = async (player, e) => {
     e.preventDefault();
@@ -166,6 +190,7 @@ export default function Roster() {
               player.teams?.find(t => t.jersey_number)?.jersey_number;
             return (
               <Link key={player.id} to={tp(`/players/${player.id}`)}
+                onClick={e => editingId === player.id && e.preventDefault()}
                 className="card p-5 hover:border-accent/30 transition-all group flex flex-col">
                 <div className="flex items-start gap-3 mb-3">
                   {/* Jersey badge */}
@@ -175,10 +200,29 @@ export default function Roster() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-white group-hover:text-accent transition-colors truncate">
-                        {player.name}
-                      </span>
-                      {player.is_featured === 1 && <span className="text-gold text-sm flex-shrink-0">⭐</span>}
+                      {editingId === player.id ? (
+                        <input
+                          ref={nameInputRef}
+                          value={editName}
+                          onChange={e => setEditName(e.target.value)}
+                          onBlur={() => commitEdit(player)}
+                          onKeyDown={e => handleNameKey(e, player)}
+                          onClick={e => e.preventDefault()}
+                          className="input-field py-0.5 px-1.5 text-sm font-bold w-full"
+                          autoFocus
+                        />
+                      ) : (
+                        <>
+                          <span
+                            className="font-bold text-white group-hover:text-accent transition-colors truncate cursor-text"
+                            onClick={e => startEdit(player, e)}
+                            title="Click to rename"
+                          >
+                            {player.name}
+                          </span>
+                          {player.is_featured === 1 && <span className="text-gold text-sm flex-shrink-0">⭐</span>}
+                        </>
+                      )}
                     </div>
                     {player.nickname && <p className="text-muted text-xs truncate">"{player.nickname}"</p>}
                     <div className="flex items-center gap-2 mt-1">
