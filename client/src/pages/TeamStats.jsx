@@ -127,7 +127,7 @@ function TotalsRow({ data, columns }) {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function TeamStats() {
-  const { teamId } = useTeam();
+  const { teamId, team: currentTeam } = useTeam();
   const tp = useTeamPath();
   const [tab, setTab] = useState('batting');
 
