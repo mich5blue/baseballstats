@@ -53,7 +53,7 @@ function LeaderCard({ label, emoji, players, statKey, statLabel, format, higherB
       ? parseFloat(b[statKey]) - parseFloat(a[statKey])
       : parseFloat(a[statKey]) - parseFloat(b[statKey])
     )
-    .slice(0, 3);
+    .slice(0, 5);
 
   if (!sorted.length) return null;
 
