@@ -57,7 +57,7 @@ export default function Home() {
                       </p>
                     )}
                   </div>
-                  {team.has_pin && (
+                  {!!team.has_pin && (
                     <span className="text-muted text-xs bg-surface2 px-2 py-0.5 rounded">PIN</span>
                   )}
                 </div>
