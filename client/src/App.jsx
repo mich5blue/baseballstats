@@ -5,6 +5,7 @@ import { useTeam } from './context/TeamContext.jsx';
 import PinGate from './components/PinGate.jsx';
 import Navbar from './components/Navbar.jsx';
 import LoadingScreen from './components/LoadingScreen.jsx';
+import ServiceBanner from './components/ServiceBanner.jsx';
 import Home from './pages/Home.jsx';
 import Manage from './pages/Manage.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -64,6 +65,7 @@ function RootLayout() {
 export default function App() {
   return (
     <BrowserRouter>
+      <ServiceBanner />
       <Routes>
         {/* Top-level pages — no team context */}
         <Route element={<RootLayout />}>

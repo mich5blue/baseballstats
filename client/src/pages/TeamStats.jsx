@@ -140,11 +140,13 @@ export default function TeamStats() {
     queryKey: ['team', teamId, 'stats'],
     queryFn: () => getTeamStats(teamId),
     enabled: !!teamId,
+    retry: false,
   });
   const { data: games = [], isLoading: gamesLoading } = useQuery({
     queryKey: ['games', teamId],
     queryFn: () => getGames(teamId),
     enabled: !!teamId,
+    retry: false,
   });
   const loading = statsLoading || gamesLoading;
 
@@ -322,23 +324,41 @@ export default function TeamStats() {
             </>}
           </div>
 
-          {/* ── Stat leaders ────────────────────────────────────────────────── */}
-          {(stats.batting.length > 0 || stats.pitching.length > 0) && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-3 mb-6">
-              <LeaderCard tp={tp} label="AVG"   icon={IcoBaseball}   players={battingEnriched} statKey="avg"          statLabel="Batting Average" />
-              <LeaderCard tp={tp} label="OBP"   icon={IcoDiamond}    players={battingEnriched} statKey="obp"          statLabel="On-Base %" />
-              <LeaderCard tp={tp} label="RBI"   icon={IcoHomePlate}  players={battingEnriched} statKey="rbi"          statLabel="Runs Batted In" />
-              <LeaderCard tp={tp} label="R"     icon={IcoRunner}     players={battingEnriched} statKey="runs"         statLabel="Runs Scored" />
-              <LeaderCard tp={tp} label="BB"    icon={IcoFourBalls}  players={battingEnriched} statKey="walks"        statLabel="Walks" />
-              <LeaderCard tp={tp} label="XBH"   icon={IcoBatContact} players={battingEnriched} statKey="xbh"          statLabel="Extra Base Hits" />
-              <LeaderCard tp={tp} label="TB"    icon={IcoBases}      players={battingEnriched} statKey="tb"           statLabel="Total Bases" />
-              {hasStolenBases && (
-                <LeaderCard tp={tp} label="SB"  icon={IcoSteal}      players={battingEnriched} statKey="stolen_bases" statLabel="Stolen Bases" />
-              )}
-              {stats.pitching.length > 0 && <>
-                <LeaderCard tp={tp} label="ERA" icon={IcoFlame}      players={stats.pitching}  statKey="era"          statLabel="Earned Run Avg" higherBetter={false} format={v => parseFloat(v).toFixed(2)} />
-                <LeaderCard tp={tp} label="K"   icon={IcoStrikeout}  players={stats.pitching}  statKey="strikeouts"   statLabel="Strikeouts" />
-              </>}
+          {/* ── Batting leaders ─────────────────────────────────────────────── */}
+          {stats.batting.length > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <IcoBaseball className="w-4 h-4 text-accent" />
+                <span className="text-xs font-bold uppercase tracking-widest text-accent">Batting Leaders</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <LeaderCard tp={tp} label="AVG"  icon={IcoBaseball}   players={battingEnriched} statKey="avg"          statLabel="Batting Average" />
+                <LeaderCard tp={tp} label="OBP"  icon={IcoDiamond}    players={battingEnriched} statKey="obp"          statLabel="On-Base %" />
+                <LeaderCard tp={tp} label="RBI"  icon={IcoHomePlate}  players={battingEnriched} statKey="rbi"          statLabel="Runs Batted In" />
+                <LeaderCard tp={tp} label="R"    icon={IcoRunner}     players={battingEnriched} statKey="runs"         statLabel="Runs Scored" />
+                <LeaderCard tp={tp} label="BB"   icon={IcoFourBalls}  players={battingEnriched} statKey="walks"        statLabel="Batting Walks" />
+                <LeaderCard tp={tp} label="XBH"  icon={IcoBatContact} players={battingEnriched} statKey="xbh"          statLabel="Extra Base Hits" />
+                <LeaderCard tp={tp} label="TB"   icon={IcoBases}      players={battingEnriched} statKey="tb"           statLabel="Total Bases" />
+                {hasStolenBases && (
+                  <LeaderCard tp={tp} label="SB" icon={IcoSteal}      players={battingEnriched} statKey="stolen_bases" statLabel="Stolen Bases" />
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── Pitching leaders ─────────────────────────────────────────────── */}
+          {stats.pitching.length > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <IcoPitcher className="w-4 h-4 text-orange-400" />
+                <span className="text-xs font-bold uppercase tracking-widest text-orange-400">Pitching Leaders</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <LeaderCard tp={tp} label="ERA"  icon={IcoFlame}     players={stats.pitching} statKey="era"        statLabel="Earned Run Avg"  higherBetter={false} format={v => parseFloat(v).toFixed(2)} />
+                <LeaderCard tp={tp} label="K"    icon={IcoStrikeout} players={stats.pitching} statKey="strikeouts" statLabel="Strikeouts (P)" />
+                <LeaderCard tp={tp} label="WHIP" icon={IcoPitcher}   players={stats.pitching} statKey="whip"       statLabel="Walks + Hits / IP" higherBetter={false} format={v => parseFloat(v).toFixed(2)} />
+                <LeaderCard tp={tp} label="IP"   icon={IcoBaseball}  players={stats.pitching} statKey="innings_pitched" statLabel="Innings Pitched" format={v => parseFloat(v).toFixed(1)} />
+              </div>
             </div>
           )}
 

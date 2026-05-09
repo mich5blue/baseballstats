@@ -12,7 +12,7 @@ const queryClient = new QueryClient({
       staleTime: 0,            // always refetch in background on mount
       gcTime: 5 * 60 * 1000,  // keep unused cache for 5 minutes
       refetchOnWindowFocus: true,
-      retry: 1,
+      retry: false,
     },
   },
 });

@@ -361,6 +361,7 @@ export default function PlayerProfile() {
 
         {/* Spray Chart / Editor */}
         <div className="lg:col-span-1">
+          {/* Spray Chart / Editor */}
           <div className="card p-5 sticky top-20">
             {editingZones && gamesForEditor.length > 0 ? (
               /* Edit mode */
